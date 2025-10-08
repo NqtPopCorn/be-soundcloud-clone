@@ -1,0 +1,30 @@
+<!-- resources/static/errorPage.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <style>
+        body { font-family: sans-serif; background: #f5f5f5; text-align: center; padding-top: 50px; }
+        .error-box { display: inline-block; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 48px; color: crimson; }
+        p { font-size: 18px; color: #555; }
+    </style>
+</head>
+<body>
+<div class="error-box">
+    <h1 id="error-code">Error</h1>
+    <p id="error-message">Something went wrong.</p>
+    <a href="logout">Logout</a>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code") || "Unknown";
+    const message = params.get("message") || "No details provided.";
+
+    document.getElementById("error-code").textContent = "Error " + code;
+    document.getElementById("error-message").textContent = decodeURIComponent(message);
+</script>
+</body>
+</html>

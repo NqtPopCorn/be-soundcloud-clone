@@ -1,0 +1,11 @@
+package com.popcorn.soundcloudclone.repository;
+
+import com.popcorn.soundcloudclone.domain.entity.Playlist;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.Optional;
+
+public interface PlaylistRepository extends JpaRepository<Playlist, Integer>, JpaSpecificationExecutor<Playlist> {
+    Optional<Playlist> findById(int id);
+}
