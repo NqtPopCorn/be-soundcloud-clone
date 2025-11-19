@@ -32,13 +32,6 @@ public class Comment {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Comment parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Comment> children;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
 }

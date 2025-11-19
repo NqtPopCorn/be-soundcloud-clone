@@ -15,7 +15,7 @@ public interface FileUploadService {
      */
     boolean replaceFile(FileUpload fileUpload, MultipartFile file);
 
-    String getFilePath(Integer id);
+    String getFilePath(String fileName);
 
     boolean deleteFile(Integer id);
 }

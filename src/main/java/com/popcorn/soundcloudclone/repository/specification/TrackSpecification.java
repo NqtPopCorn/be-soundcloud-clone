@@ -25,7 +25,7 @@ public class TrackSpecification {
     /**
      * Artist username 'like' specification
      */
-    public static Specification<Track> hasArtist(String username) {
+    public static Specification<Track> hasArtistName(String username) {
         return (root, query, cb) -> {
             // rong thi skip
             if (username == null || username.isBlank()) return null;
@@ -34,12 +34,15 @@ public class TrackSpecification {
         };
     }
 
-    /**
-     * Has privacy PRIVATE OR PUBLIC
-     * @return Specification
-     */
-    public static Specification<Track> hasPrivacy(Track.Privacy privacy) {
+    public static Specification<Track> hasArtistId(Integer artistId) {
+        return (root, query, cb) -> {
+            if (artistId == null || artistId == 0) return null;
+            return cb.equal(root.<User>get("artist").get("id"), artistId);
+        };
+    }
+
+    public static Specification<Track> privacy(Track.Privacy privacy) {
         if(privacy == null) return null;
-        return (root, query, cb) -> cb.equal(root.get("privacy"), privacy.name());
+        return (root, query, cb) -> cb.equal(root.get("privacy"), privacy );
     }
 }

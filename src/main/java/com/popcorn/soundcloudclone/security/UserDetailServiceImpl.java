@@ -15,7 +15,6 @@ import com.popcorn.soundcloudclone.domain.entity.User;
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
-    UserPrincipal userPrincipal;
     @Override
     public MyUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User appUser = userRepository.findByUsername(username)

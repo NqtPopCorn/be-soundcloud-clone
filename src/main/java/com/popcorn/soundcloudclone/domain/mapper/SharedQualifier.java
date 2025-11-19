@@ -26,18 +26,18 @@ public class SharedQualifier {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Named("getImageUrl")
-    public String getImageUrl(FileUpload fileUpload) {
-        if (fileUpload == null) return null;
-        return imageBaseUrl + fileUpload.getId();
-    }
-
-    @Named("getAudioUrl")
-    public String getAudioUrl(Track track) {
-        var fileUpload = track.getAudioUpload();
-        if (fileUpload == null) return null;
-        return audioBaseUrl + track.getId() + "/stream";
-    }
+//    @Named("getImageUrl")
+//    public String getImageUrl(FileUpload fileUpload) {
+//        if (fileUpload == null) return null;
+//        return imageBaseUrl + fileUpload.getId();
+//    }
+//
+//    @Named("getAudioUrl")
+//    public String getAudioUrl(Track track) {
+//        var fileUpload = track.getAudioUpload();
+//        if (fileUpload == null) return null;
+//        return audioBaseUrl + track.getId() + "/stream";
+//    }
 
     @Named("getRoleName")
     public String getRoleName(User user) {
@@ -48,4 +48,9 @@ public class SharedQualifier {
     public String hashPassword(String password) {
         return passwordEncoder.encode(password);
     }
+
+//    @Named("getUserPlaylists")
+//    public Set<PlaylistSummaryResponse> getUserPlaylists(User user) {
+//
+//    }
 }

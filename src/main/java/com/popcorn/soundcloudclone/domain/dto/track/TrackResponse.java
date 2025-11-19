@@ -39,4 +39,6 @@ public class TrackResponse {
 
     List<String> tags;
 
+    String privacy;
+
 }

@@ -19,7 +19,7 @@ public abstract class AlbumMapper {
 
     @Mapping(target = "user", source = "artist")
     @Mapping(target = "tracks", source = "joinTracks")
-    @Mapping(target = "coverImageUrl", source = "coverUpload", qualifiedByName = "getImageUrl")
+    @Mapping(target = "coverImageUrl", source = "coverUpload.url")
     @Mapping(target = "tags", source = "tags", qualifiedByName = "splitTags")
     public abstract AlbumResponse toAlbumResponse(Album album, @Context List<Integer> likedTrackIds);
 

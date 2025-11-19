@@ -12,7 +12,7 @@ import java.time.LocalDate;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Getter
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class UserResponse {

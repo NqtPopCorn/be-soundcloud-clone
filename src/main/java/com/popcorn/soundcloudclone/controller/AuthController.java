@@ -33,14 +33,6 @@ public class AuthController {
                 .build();
 
         String token = authResponse.getToken();
-//        // build cookie
-//        ResponseCookie cookie = ResponseCookie.from("access_token", token)
-//                .httpOnly(true)
-//                .secure(false) // Chỉ nên true nếu dùng HTTPS
-//                .path("/")
-//                .maxAge(Duration.ofHours(24))
-//                .sameSite("Lax")
-//                .build();
 
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + token)
@@ -49,14 +41,6 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
-        // Tạo cookie trùng tên nhưng có maxAge = 0
-//        ResponseCookie deleteCookie = ResponseCookie.from("access_token", "")
-//                .httpOnly(true)
-//                .secure(false) // true nếu dùng HTTPS
-//                .path("/")
-//                .maxAge(0) // <== quan trọng: xoá cookie
-//                .sameSite("Lax")
-//                .build();
 
         var response = ApiResponse.<Void>builder()
                 .result(null)
@@ -71,7 +55,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponse>> register(@RequestBody UserCreationRequest request) {
         var response = userService.createRequest(request);
         return ResponseEntity.ok(ApiResponse.<UserResponse>builder()
-                    .code(1000)
+                    .statusCode(200)
                     .message("User registered")
                     .result(response)
                 .build());
@@ -81,14 +65,22 @@ public class AuthController {
     @PreAuthorize("authentication != null")
     ResponseEntity<ApiResponse<AuthResponse>> introspect(@AuthenticationPrincipal UserDetails userDetails) {
         var authResponse = AuthResponse.builder()
-                .user(userService.userGetInfoByUsername(userDetails.getUsername()))
+                .user(userService.getUserProfileByUsername(userDetails.getUsername()))
                 .build();
 
         var body = ApiResponse.<AuthResponse>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Success")
                 .result(authResponse)
                 .build();
         return ResponseEntity.ok(body);
     }
+
+    // refresh
+//    @PostMapping("/refresh")
+//    @PreAuthorize("authentication != null")
+//    ResponseEntity<ApiResponse<AuthResponse>> refresh(@AuthenticationPrincipal UserDetails userDetails) {
+//
+//        return null;
+//    }
 }

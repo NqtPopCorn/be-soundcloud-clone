@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -24,11 +26,32 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String firstName;
+    @Column(nullable = false)
+    private String lastName;
+    @Column
+    private String city;
+    @Column
+    private String country;
+    @Column
+    private String stageName;
+    private int followersCount = 0;
+    private int followingCount = 0;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    public enum Role {
+        ADMIN, ARTIST, USER
+    }
 
     @ManyToOne
     @JoinColumn(name = "avatar_upload_id")
@@ -44,30 +67,14 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "track_id")
     )
-    private Set<Track> likedTracks = new HashSet<>();
+    private List<Track> likedTracks = new ArrayList<>();
 
-    @Column(nullable = false)
-    private String firstName;
-    @Column(nullable = false)
-    private String lastName;
-    @Column(nullable = false)
-    private String city;
-    @Column(nullable = false)
-    private String country;
-    @Column(nullable = false)
-    private String stageName;
-    private int followersCount = 0;
-    private int followingCount = 0;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @OneToMany(mappedBy = "creator")
+    private List<Playlist> playlists = new ArrayList<>();
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String bio;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    public enum Role {
-        ADMIN, ARTIST, USER
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
 }

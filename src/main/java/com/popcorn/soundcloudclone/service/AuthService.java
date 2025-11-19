@@ -1,7 +1,7 @@
 package com.popcorn.soundcloudclone.service;
 
 import com.popcorn.soundcloudclone.domain.dto.auth.AuthResponse;
-import com.popcorn.soundcloudclone.domain.dto.auth.IntrospectResponse;
+import com.popcorn.soundcloudclone.domain.dto.auth.JwtVerifyResponse;
 
 public interface AuthService {
 
@@ -11,10 +11,5 @@ public interface AuthService {
      */
     AuthResponse authenticate(String username, String password);
 
-    /**
-     * Verify access token (alt name: verify)
-     * @param accessToken jwt token
-     * @return verify result and user info
-     */
-    IntrospectResponse introspect(String accessToken);
+//    AuthResponse refresh(String refreshToken);
 }

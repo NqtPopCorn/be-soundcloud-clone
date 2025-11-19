@@ -22,8 +22,14 @@ public class FileUpload {
     @Column(nullable = false)
     private String filePath;
 
-    @Column
+    @Column(name = "file_name")
     private String fileName;
+
+    private String originalName;
+
+    private String url;
+
+    private long size;
 
     @Enumerated(EnumType.STRING)
     private FileType fileType;
@@ -33,5 +39,10 @@ public class FileUpload {
 
     public enum FileType {
         audio, image
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        uploadedAt = LocalDateTime.now();
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -17,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
         ApiResponse body = ApiResponse.builder()
                 .message(e.getMessage())
-                .code(1101)
+                .statusCode(1101)
                 .build();
         e.printStackTrace(System.err);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
@@ -27,7 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleAuthorizationException(AuthorizationDeniedException e) {
         ApiResponse body = ApiResponse.builder()
                 .message(e.getMessage())
-                .code(ErrorCode.UNAUTHORIZED.getCode())
+                .statusCode(ErrorCode.UNAUTHORIZED.getCode())
                 .build();
         e.printStackTrace(System.err);
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
@@ -38,7 +39,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
         ApiResponse body = ApiResponse.builder()
                 .message(e.getMessage())
-                .code(errorCode.getCode())
+                .statusCode(errorCode.getCode())
                 .build();
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
@@ -56,7 +57,7 @@ public class GlobalExceptionHandler {
         }
         ApiResponse body = ApiResponse.builder()
                 .message(message)
-                .code(errorCode.getCode())
+                .statusCode(errorCode.getCode())
                 .build();
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
@@ -73,4 +74,15 @@ public class GlobalExceptionHandler {
 //
 //        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 //    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse> handleMissingRequestParamException(MissingServletRequestParameterException e) {
+
+        ApiResponse body = ApiResponse.builder()
+                .message(e.getMessage())
+                .statusCode(401)
+                .result(e.getParameterName())
+                .build();
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
 }

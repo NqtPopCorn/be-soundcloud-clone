@@ -1,24 +1,19 @@
 package com.popcorn.soundcloudclone.service.impl;
 
-import com.popcorn.soundcloudclone.domain.dto.track.ArtistTrackResponse;
-import com.popcorn.soundcloudclone.domain.dto.track.TrackResponse;
-import com.popcorn.soundcloudclone.domain.dto.track.TrackCreationRequest;
-import com.popcorn.soundcloudclone.domain.dto.track.TrackUpdateRequest;
 import com.popcorn.soundcloudclone.domain.dto.PageResponse;
+import com.popcorn.soundcloudclone.domain.dto.track.*;
 import com.popcorn.soundcloudclone.domain.entity.*;
-import com.popcorn.soundcloudclone.domain.mapper.PageResponseBuilder;
 import com.popcorn.soundcloudclone.domain.mapper.TrackMapper;
 import com.popcorn.soundcloudclone.repository.*;
 import com.popcorn.soundcloudclone.repository.specification.TrackSpecification;
-import com.popcorn.soundcloudclone.service.FileUploadService;
-import com.popcorn.soundcloudclone.service.PlayCache;
-import com.popcorn.soundcloudclone.service.TrackService;
+import com.popcorn.soundcloudclone.security.UserSecurity;
+import com.popcorn.soundcloudclone.service.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,20 +24,21 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class TrackServiceImpl implements TrackService {
+public class TrackServiceV2Impl implements TrackServiceV2 {
     private final TrackRepository trackRepository;
     private final UserRepository userRepository;
     private final GenreRepository genreRepository;
     private final FileUploadService fileUploadService;
     private final TrackMapper trackMapper;
-    private final PageResponseBuilder<TrackResponse> pageResponseBuilder;
+//    private final PageResponseMapper<TrackResponse> pageResponseMapper;
     private final TrackPlayRepository trackPlayRepository;
     private final TrackLikeRepository trackLikeRepository;
     private final PlayCache playCache;
+    private final FavoriteService favoriteService;
 
     @Override
     @Transactional
-    public ArtistTrackResponse createTrack(int userId, TrackCreationRequest request) {
+    public TrackResponse createTrack(int userId, TrackCreationRequest request) {
         //goi mapper
         Track track = trackMapper.toTrack(request);
 
@@ -55,63 +51,30 @@ public class TrackServiceImpl implements TrackService {
         var image = fileUploadService.storeFile(request.getImageUpload(), FileUpload.FileType.image);
         track.setImageUpload(image);
 
-        return trackMapper.toArtistTrackResponse(trackRepository.save(track));
+        return trackMapper.toTrackResponse(trackRepository.save(track));
 
     }
 
     @Override
-    public PageResponse<TrackResponse> getPage(
-            String keyword,
-            String artistUsername,
-            Track.Privacy privacy,
-            Pageable pageable) {
-        Specification<Track> mainSpec = TrackSpecification.keywordContains(keyword)
-                .and(TrackSpecification.hasPrivacy(privacy))
-                .and(TrackSpecification.hasArtist(artistUsername));
+    public PageResponse<TrackResponse> getPageForUser(
+            TrackFilterRequest filterReq,
+            Pageable pageable,
+            Integer userId,
+            Track.Privacy privacy) {
+        Specification<Track> mainSpec = TrackSpecification
+                .keywordContains(filterReq.getKeyword())
+                .and(TrackSpecification.privacy(privacy))
+                .and(TrackSpecification.hasArtistName(filterReq.getArtistName()));
 
-        return pageResponseBuilder.toPageResponse(
-                trackRepository.findAll(mainSpec, pageable)
-                        .map(trackMapper::toTrackResponse)
-        );
-    }
 
-    @Override
-    public PageResponse<TrackResponse> getPage(
-            int currentUserId,
-            String keyword,
-            String artistUsername,
-            Track.Privacy privacy,
-            Pageable pageable
-    ) {
-        // Các Specification đã kiểm tra null
-        Specification<Track> mainSpec = TrackSpecification.keywordContains(keyword)
-                .and(TrackSpecification.hasPrivacy(privacy))
-                .and(TrackSpecification.hasArtist(artistUsername));
+        if(userId == null) {
+            return PageResponse.from(trackRepository.findAll(mainSpec, pageable)
+                    .map(trackMapper::toTrackResponse));
+        }
 
-        List<Integer> likedTrackIds = getLikedTracks(currentUserId);
-
-        return pageResponseBuilder.toPageResponse(
-                trackRepository.findAll(mainSpec, pageable)
-                        .map(track -> trackMapper.toTrackResponse(track, likedTrackIds))
-        );
-    }
-
-    @Override
-    public PageResponse<ArtistTrackResponse> getArtistTrackPage(
-            String keyword,
-            String username,
-            Track.Privacy privacy,
-            Pageable pageable) {
-        Specification<Track> mainSpec = TrackSpecification.keywordContains(keyword)
-                .and(TrackSpecification.hasPrivacy(privacy))
-                .and(TrackSpecification.hasArtist(username));
-
-//        List<Integer> likedTrackIds = getLikedTracks();
-
-        return new PageResponseBuilder<ArtistTrackResponse>().toPageResponse(
-                trackRepository.findAll(mainSpec, pageable)
-                        .map(trackMapper::toArtistTrackResponse)
-        );
+        List<Integer> userLikedTrackIds = favoriteService.getLikedTrackIds(userId);
+        return PageResponse.from(trackRepository.findAll(mainSpec, pageable)
+                .map((track) -> trackMapper.toTrackResponse(track, userLikedTrackIds)));
     }
 
     @Override
@@ -120,8 +83,10 @@ public class TrackServiceImpl implements TrackService {
     }
 
     @Override
-    public TrackResponse getTrackResponse(int trackId, int userId) {
-        return trackMapper.toTrackResponse(findTrackByIdOrThrow(trackId), getLikedTracks(userId));
+    public TrackResponse getTrackResponseForUser(int trackId, int userId) {
+        Track track = findTrackByIdOrThrow(trackId);
+        List<Integer> userLikedTrackIds = favoriteService.getLikedTrackIds(userId);
+        return trackMapper.toTrackResponse(track, userLikedTrackIds);
     }
 
     public Track findTrackByIdOrThrow(int trackId) {
@@ -132,23 +97,9 @@ public class TrackServiceImpl implements TrackService {
         return userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
     }
 
-    private User getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-                UserDetails user = (UserDetails)authentication.getPrincipal();
-                String username = user.getUsername();
-
-                return userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     @Override
-    public boolean updateTrack(int id, TrackUpdateRequest request) {
+    @Transactional
+    public TrackResponse updateTrack(int id, TrackUpdateRequest request) {
         Track track = findTrackByIdOrThrow(id);
         trackMapper.updateTrack(track, request);
 
@@ -161,19 +112,18 @@ public class TrackServiceImpl implements TrackService {
             fileUploadService.replaceFile(track.getImageUpload(), request.getImageUpload());
         }
 
-        trackRepository.save(track);
-        return true;
+        return trackMapper.toTrackResponse(trackRepository.save(track));
+
     }
 
     @Override
     @Transactional
-    public boolean deleteTrack(int trackId) {
+    public void deleteTrack(int trackId) {
         var track = trackRepository.findById(trackId).orElseThrow(()->new RuntimeException("Track not found"));
         trackRepository.delete(track);
 
         fileUploadService.deleteFile(track.getAudioUpload().getId());
         fileUploadService.deleteFile(track.getImageUpload().getId());
-        return true;
     }
 
     @Override

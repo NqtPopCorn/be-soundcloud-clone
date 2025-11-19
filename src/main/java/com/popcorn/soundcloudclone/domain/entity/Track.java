@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class Track {
     private Privacy privacy = Privacy.PUBLIC;
 
     @ManyToMany(mappedBy = "likedTracks")
-    private Set<User> likedByUsers = new HashSet<>();
+    private List<User> likedByUsers = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

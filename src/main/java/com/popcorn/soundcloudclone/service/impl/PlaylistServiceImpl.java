@@ -4,13 +4,14 @@ import com.popcorn.soundcloudclone.domain.dto.PageResponse;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistCreationRequest;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistResponse;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistUpdateRequest;
+import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistSummaryResponse;
 import com.popcorn.soundcloudclone.domain.entity.Playlist;
 import com.popcorn.soundcloudclone.domain.entity.PlaylistTrack;
 import com.popcorn.soundcloudclone.domain.entity.Track;
 import com.popcorn.soundcloudclone.domain.entity.User;
+import com.popcorn.soundcloudclone.domain.mapper.UserMapper;
 import com.popcorn.soundcloudclone.exception.BadRequestException;
 import com.popcorn.soundcloudclone.exception.ErrorCode;
-import com.popcorn.soundcloudclone.domain.mapper.PageResponseBuilder;
 import com.popcorn.soundcloudclone.domain.mapper.PlaylistMapper;
 import com.popcorn.soundcloudclone.repository.PlaylistRepository;
 import com.popcorn.soundcloudclone.repository.PlaylistTrackRepository;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,9 +40,9 @@ public class PlaylistServiceImpl implements PlaylistService {
     PlaylistRepository playlistRepository;
     TrackRepository trackRepository;
     PlaylistMapper playlistMapper;
-    PageResponseBuilder<PlaylistResponse> pageResponseBuilder;
     PlaylistTrackRepository playlistTrackRepository;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
 
     @Override
@@ -61,7 +63,12 @@ public class PlaylistServiceImpl implements PlaylistService {
           Pageable pageable = PageRequest.of(page, size, asc? Sort.Direction.ASC : Sort.Direction.DESC, "id");
           var spec = PlaylistSpecification.keywordContains(keyword);
           var playlists = playlistRepository.findAll(spec, pageable);
-          return pageResponseBuilder.toPageResponse(playlists.map(playlistMapper::toPlaylistResponse));
+          return PageResponse.from(playlists.map(playlistMapper::toPlaylistResponse));
+    }
+
+    @Override
+    public List<PlaylistSummaryResponse> getUserPlaylistSummaries(int userId) {
+        return playlistRepository.findAllByCreatorId(userId).stream().map(playlistMapper::toPlaylistSummaryResponse).toList();
     }
 
     @Override
@@ -80,7 +87,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     public void updatePlaylist(int id, PlaylistUpdateRequest request) {
         var playlist = playlistRepository.findById(id).orElseThrow(()->new RuntimeException("Playlist not found"));
         playlist.setName(request.getName());
-        playlist.setPublic(request.getIsPublic());
+        playlist.setIsPublic(request.getIsPublic());
         playlistRepository.save(playlist);
     }
 
@@ -111,13 +118,15 @@ public class PlaylistServiceImpl implements PlaylistService {
     public void addTracksToPlaylist(int playlistId, List<Integer> trackIds) {
         var tracks = trackRepository.findByIdIn(trackIds);
         var playlist = findPlaylistByIdOrThrow(playlistId);
+        int trackCount = playlistTrackRepository.countByPlaylistId(playlistId);
         for (Track track : tracks) {
             PlaylistTrack playlistTrack = PlaylistTrack.builder()
                     .playlist(playlist)
                     .track(track)
-                    .position(playlistTrackRepository.countByPlaylistId(playlistId))
+                    .position(trackCount)
                     .build();
-            playlistTrackRepository.save(playlistTrack);
+            playlistTrackRepository.save(playlistTrack); // check unique
+            trackCount++;
         }
 
         playlistTrackRepository.flush();

@@ -7,7 +7,6 @@ import com.popcorn.soundcloudclone.domain.entity.User;
 import com.popcorn.soundcloudclone.domain.entity.UserFollower;
 import com.popcorn.soundcloudclone.exception.BadRequestException;
 import com.popcorn.soundcloudclone.exception.ErrorCode;
-import com.popcorn.soundcloudclone.domain.mapper.PageResponseBuilder;
 import com.popcorn.soundcloudclone.domain.mapper.UserMapper;
 import com.popcorn.soundcloudclone.repository.UserFollowerRepository;
 import com.popcorn.soundcloudclone.repository.UserRepository;
@@ -32,10 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
-    PageResponseBuilder<UserResponse> pageResponseBuilder;
+//    PageResponseMapper<UserResponse> pageResponseMapper;
     BCryptPasswordEncoder passwordEncoder;
     FileUploadService fileUploadService;
-    private final UserFollowerRepository userFollowerRepository;
+    UserFollowerRepository userFollowerRepository;
 
     @Override
     public UserResponse createRequest(UserCreationRequest request) {
@@ -46,6 +45,8 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(User.Role.USER)
                 .build();
@@ -81,16 +82,16 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page, size, sorting);
         Specification<User> spec = UserSpecification.keywordContains(keyword);
 
-        return pageResponseBuilder.toPageResponse(
-                userRepository.findAll(spec, pageable).map(userMapper::toUserResponse));
+        return PageResponse.from((
+                userRepository.findAll(spec, pageable).map(userMapper::toUserResponse)));
 
     }
 
-    public UserResponse userGetInfo(int id) {
+    public UserResponse getUserProfileById(int id) {
         return userMapper.toUserResponse(findUserByIdOrThrow(id));
     }
 
-    public UserResponse userGetInfoByUsername(String username) {
+    public UserResponse getUserProfileByUsername(String username) {
         var found = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 //        if(found == null) {
 //            found = findUserByIdOrThrow(Integer.parseInt(username));

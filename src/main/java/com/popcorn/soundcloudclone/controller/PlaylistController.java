@@ -5,6 +5,7 @@ import com.popcorn.soundcloudclone.domain.dto.PageResponse;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistCreationRequest;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistResponse;
 import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistUpdateRequest;
+import com.popcorn.soundcloudclone.domain.dto.playlist.PlaylistSummaryResponse;
 import com.popcorn.soundcloudclone.security.MyUserDetails;
 import com.popcorn.soundcloudclone.service.PlaylistService;
 import jakarta.validation.Valid;
@@ -32,7 +33,7 @@ public class PlaylistController {
         boolean asc = "asc".equalsIgnoreCase(sortType);
         var pageResponse = playlistService.findByKeyword(keyword, page, size, asc);
         var body = ApiResponse.<PageResponse<PlaylistResponse>>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Success")
                 .result(pageResponse)
                 .build();
@@ -43,7 +44,7 @@ public class PlaylistController {
     public ResponseEntity<ApiResponse<PlaylistResponse>> getById(@PathVariable int id) {
         var response = playlistService.getById(id);
         var body = ApiResponse.<PlaylistResponse>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Playlist found")
                 .result(response)
                 .build();
@@ -57,7 +58,7 @@ public class PlaylistController {
         int userId = ((MyUserDetails)auth.getPrincipal()).getUserId();
         playlistService.create(userId, request);
         return ResponseEntity.ok(ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Create successfully")
                 .build());
     }
@@ -66,16 +67,16 @@ public class PlaylistController {
     public ResponseEntity<ApiResponse> updatePlaylist(@PathVariable int id, @RequestBody @Valid PlaylistUpdateRequest request) {
         playlistService.updatePlaylist(id, request);
         return ResponseEntity.ok(ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Update successfully")
                 .build());
     }
 
-    @PutMapping("/{playlistId}/add-track")
+    @PostMapping("/{playlistId}/add-tracks")
     public ResponseEntity<ApiResponse> addTrackPlaylist(@PathVariable int playlistId, @RequestParam List<Integer> trackIds) {
         playlistService.addTracksToPlaylist(playlistId, trackIds);
         return ResponseEntity.ok(ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Add track successfully")
                 .build());
     }
@@ -84,7 +85,7 @@ public class PlaylistController {
     public ResponseEntity<ApiResponse> updatePlaylistTracks(@PathVariable int playlistId, @RequestParam List<Integer> trackIds) {
         playlistService.updatePlaylistTracks(playlistId, trackIds);
         return ResponseEntity.ok(ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Update playlist tracks successfully")
                 .build());
     }
@@ -93,7 +94,7 @@ public class PlaylistController {
     public ResponseEntity<ApiResponse> deletePlaylist(@PathVariable int id) {
         playlistService.deletePlaylist(id);
         return ResponseEntity.ok(ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Delete playlist successfully")
                 .build());
     }

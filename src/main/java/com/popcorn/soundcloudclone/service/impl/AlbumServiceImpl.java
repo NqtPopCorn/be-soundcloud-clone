@@ -6,19 +6,16 @@ import com.popcorn.soundcloudclone.domain.dto.album.AlbumResponse;
 import com.popcorn.soundcloudclone.domain.dto.album.AlbumUpdateRequest;
 import com.popcorn.soundcloudclone.domain.entity.*;
 import com.popcorn.soundcloudclone.domain.mapper.AlbumMapper;
-import com.popcorn.soundcloudclone.domain.mapper.PageResponseBuilder;
 import com.popcorn.soundcloudclone.repository.*;
 import com.popcorn.soundcloudclone.repository.specification.AlbumSpecification;
 import com.popcorn.soundcloudclone.service.AlbumService;
+import com.popcorn.soundcloudclone.service.FavoriteService;
 import com.popcorn.soundcloudclone.service.FileUploadService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -34,47 +31,26 @@ public class AlbumServiceImpl implements AlbumService {
     private final AlbumTrackRepository albumTrackRepository;
     private final TrackLikeRepository trackLikeRepository;
     private final AlbumMapper albumMapper;
-    private final PageResponseBuilder<AlbumResponse> pageResponseBuilder;
+//    private final PageResponseMapper<AlbumResponse> pageResponseMapper;
 
     private final FileUploadService fileUploadService;
+    private final FavoriteService favoriteService;
 
 
     @Override
-    public AlbumResponse getById(int id) { // lay tat ca
-        var album = findAlbumByIdOrThrow(id);
-        return albumMapper. toAlbumResponse(album, getLikedTracks());
-    }
+    public AlbumResponse getById(int albumId, Integer userId) { // lay tat ca
+        var album = findAlbumByIdOrThrow(albumId);
 
-    private List<Integer> getLikedTracks() {
-        var curUser = getCurrentUser();
-        if(curUser == null) {
-            return new ArrayList<>();
-        }
-        return trackLikeRepository.getLikedTrackIds(curUser.getId()).orElse(new ArrayList<>());
-    }
-
-    private User getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-                UserDetails user = (UserDetails)authentication.getPrincipal();
-                String username = user.getUsername();
-
-                return userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
+        return albumMapper. toAlbumResponse(album, getLikedTracks(userId));
     }
 
     @Override
-    public PageResponse<AlbumResponse> findByKeyword(String keyword, int page, int size, boolean asc) {
+    public PageResponse<AlbumResponse> findByKeyword(String keyword, int page, int size, boolean asc, Integer userId) {
         Pageable pageable = PageRequest.of(page, size, asc? Sort.Direction.ASC : Sort.Direction.DESC, "id");
         var spec = AlbumSpecification.keywordContains(keyword);
         var albums = albumRepository.findAll(spec, pageable);
-        return pageResponseBuilder.toPageResponse(albums.map(
-                album -> albumMapper.toAlbumResponse(album, getLikedTracks())
+        return PageResponse.from(albums.map(
+                album -> albumMapper.toAlbumResponse(album, getLikedTracks(userId))
         ));
     }
 
@@ -86,7 +62,7 @@ public class AlbumServiceImpl implements AlbumService {
                 .artist(user)
                 .releaseDate(LocalDate.now())
                 .build();
-        return albumMapper.toAlbumResponse(albumRepository.save(album), getLikedTracks());
+        return albumMapper.toAlbumResponse(albumRepository.save(album), getLikedTracks(userId));
     }
 
     private User findUserByIdOrThrow(int id) {
@@ -184,5 +160,10 @@ public class AlbumServiceImpl implements AlbumService {
         albumRepository.delete(album);
     }
 
-
+    private List<Integer> getLikedTracks(Integer userId) {
+        if(userId == null) {
+            return new ArrayList<>();
+        }
+        return favoriteService.getLikedTrackIds(userId);
+    }
 }

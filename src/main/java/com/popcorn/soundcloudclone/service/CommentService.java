@@ -9,9 +9,6 @@ public interface CommentService {
     CommentResponse createComment(CommentRequest commentRequest);
     CommentResponse getComment(Long commentId);
 
-    /**
-     * Get all comments of the specific track
-     */
     List<CommentResponse> getComments(int trackId);
     CommentResponse updateComment(CommentRequest commentRequest);
     void deleteComment(Long commentId);

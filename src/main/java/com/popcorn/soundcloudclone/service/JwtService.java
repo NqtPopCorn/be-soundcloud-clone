@@ -1,12 +1,13 @@
 package com.popcorn.soundcloudclone.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import com.popcorn.soundcloudclone.domain.dto.auth.JwtVerifyResponse;
 
 public interface JwtService {
-    String generateToken(String username);
-
+    String generateToken(String username, String role, long expires);
     /**
-     * Extract username WITHOUT VERIFY sign or exp
-     * */
-    String extractUsername(String token);
+     * Verify access token
+     * @param accessToken jwt token
+     * @return verify result and user info
+     */
+    JwtVerifyResponse verifyToken(String accessToken);
 }

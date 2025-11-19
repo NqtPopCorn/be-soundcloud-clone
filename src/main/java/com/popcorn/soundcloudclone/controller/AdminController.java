@@ -31,7 +31,7 @@ public class AdminController {
     @PostMapping("/users")
     ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody @Valid AdminCreationUserRequest request) {
         var body = ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Success")
                 .result(userService.createAdminRequest(request))
                 .build();
@@ -48,7 +48,7 @@ public class AdminController {
     ) {
         var pageResponse = userService.getPageUsers(keyword, page, size, sortType);
         var body = ApiResponse.<PageResponse<UserResponse>>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Success")
                 .result(pageResponse)
                 .build();
@@ -58,9 +58,9 @@ public class AdminController {
     @GetMapping("/users/{id}")
     ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable int id) {
         var body = ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Success")
-                .result(userService.userGetInfo(id))
+                .result(userService.getUserProfileById(id))
                 .build();
         return ResponseEntity.ok(body);
     }
@@ -68,7 +68,7 @@ public class AdminController {
     @PutMapping(value = "/users/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable int id, @ModelAttribute @Valid AdminUpdateUserRequest request) {
         var body = ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Update success")
                 .result(userService.adminUpdateUser(id, request))
                 .build();
@@ -81,7 +81,7 @@ public class AdminController {
     ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
         var body = ApiResponse.<Void>builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Delete success")
                 .build();
 
@@ -101,7 +101,7 @@ public class AdminController {
         }
 
         var body = ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Update success")
                 .build();
         return ResponseEntity.ok(body);
@@ -120,7 +120,7 @@ public class AdminController {
         }
 
         var body = ApiResponse.builder()
-                .code(1000)
+                .statusCode(200)
                 .message("Update success")
                 .build();
         return ResponseEntity.ok(body);

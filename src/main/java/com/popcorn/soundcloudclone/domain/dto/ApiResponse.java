@@ -8,7 +8,7 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    public int code;
+    public int statusCode;
     public String message;
     public T result;
 }

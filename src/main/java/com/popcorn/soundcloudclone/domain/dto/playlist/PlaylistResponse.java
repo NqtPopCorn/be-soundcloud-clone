@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PlaylistResponse {
+    int id;
     String name;
     UserSummaryResponse user;
     List<TrackItemResponse> tracks;

@@ -6,13 +6,14 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.popcorn.soundcloudclone.domain.dto.auth.AuthResponse;
-import com.popcorn.soundcloudclone.domain.dto.auth.IntrospectResponse;
+import com.popcorn.soundcloudclone.domain.dto.auth.JwtVerifyResponse;
 import com.popcorn.soundcloudclone.domain.entity.User;
 import com.popcorn.soundcloudclone.exception.BadRequestException;
 import com.popcorn.soundcloudclone.exception.ErrorCode;
 import com.popcorn.soundcloudclone.domain.mapper.UserMapper;
 import com.popcorn.soundcloudclone.repository.UserRepository;
 import com.popcorn.soundcloudclone.service.AuthService;
+import com.popcorn.soundcloudclone.service.JwtService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,15 +32,20 @@ import java.util.Date;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class AuthServiceImpl implements AuthService {
+public class JwtAuthService implements AuthService, JwtService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
 
     @NonFinal
     @Value("${jwt.secret_key}")
-    protected String SECRET_KEY;
+    protected String JWT_SECRET_KEY;
 
+//    @NonFinal
+//    @Value("${jwt.refresh_key}")
+//    protected String JWT_REFRESH_KEY;
+
+    @Override
     public AuthResponse authenticate(String username, String password) {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(()->new BadRequestException(ErrorCode.USER_NOT_FOUND));
@@ -49,46 +55,57 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException(ErrorCode.UNAUTHENTICATED);
         }
 
-        String token = createToken(username, user.getRole().name(), Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli());
+        String token = generateToken(username, user.getRole().name(), Instant.now().plus(30, ChronoUnit.DAYS).toEpochMilli());
         return AuthResponse.builder()
                 .token(token)
                 .user(userMapper.toUserResponse(user))
                 .build();
     }
 
-    public IntrospectResponse introspect(String accessToken) {
+//    @Override
+//    public AuthResponse refresh(String refreshToken) {
+//        if(passwordEncoder.matches(refreshToken, JWT_REFRESH_KEY)) {
+//
+//        }
+//    }
+
+    @Override
+    public JwtVerifyResponse verifyToken(String accessToken) {
         try {
-            JWSVerifier verifier = new MACVerifier(SECRET_KEY);
+            JWSVerifier verifier = new MACVerifier(JWT_SECRET_KEY);
             SignedJWT signedJWT = SignedJWT.parse(accessToken);
-            Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
+            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+            Date expirationDate = claimsSet.getExpirationTime();
 
             boolean verified = signedJWT.verify(verifier); // kiem tra chu ki
-            String username = signedJWT.getJWTClaimsSet().getSubject();
+            String username = claimsSet.getSubject();
             User found = userRepository.findByUsername(username).orElse(null);
-            String authorities = signedJWT.getJWTClaimsSet().getStringClaim("authorities");
+            String authorities = claimsSet.getStringClaim("authorities");
+            int userId = found != null ? found.getId() : 0;
             String message = "";
-            int userId = 0;
-            if(found != null) {
-                userId = found.getId();
-            }
+            int statusCode = 200;
             if(!verified) {
-                message = "You are not authorized to perform this action";
+                message = "You are not authorized to perform this action"; //401
+                statusCode = 401;
             } else if(!expirationDate.after(new Date())) {
-                message = "Token expired";
+                message = "Token expired"; // 403
+                statusCode = 401;
             } else if(found == null) {
-                message = "User not found";
+                message = "User not found"; //401
+                statusCode = 401;
             }
 
-            return IntrospectResponse.builder()
+            return JwtVerifyResponse.builder()
                     .valid(verified && expirationDate.after(new Date()) && found != null)
                     .authorities(authorities)
                     .username(username)
                     .userId(userId)
-                    .message(message)
+                    .statusCode(statusCode)
+                    .errorMessage(message)
                     .build();
         } catch (JOSEException | ParseException e) {
             log.error("JWS verifier error");
-            return IntrospectResponse.builder()
+            return JwtVerifyResponse.builder()
                     .valid(false)
                     .build();
         }
@@ -99,27 +116,25 @@ public class AuthServiceImpl implements AuthService {
      * Create a jwt token with subject: username and single role as authorities.
      * @return jwt token
      */
-    private String createToken(String username,String role, long expiresDate) {
-        // Chua thuat toan hash
+    @Override
+    public String generateToken(String username, String role, long expiresDate) {
+        // Hashing algorithm
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
 
         // Body payload
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(username)
                 .claim("authorities", "ROLE_"+role)
-//                .claim("userId", userId)
                 .issuer("SoundCloudClone") // host
                 .issueTime(new Date())
                 .expirationTime(new Date(expiresDate))
                 .build();
-
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
+        // Sign token
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
-
-        // Ky token
         try {
-            jwsObject.sign(new MACSigner(SECRET_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(JWT_SECRET_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot sign JWT", e);

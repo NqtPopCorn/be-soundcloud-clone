@@ -34,5 +34,5 @@ public class Playlist {
     @Column
     private String name;
 
-    private boolean isPublic = false;
+    private Boolean isPublic = false;
 }

@@ -7,9 +7,9 @@ import com.popcorn.soundcloudclone.domain.dto.album.AlbumUpdateRequest;
 import java.util.List;
 
 public interface AlbumService {
-    AlbumResponse getById(int id);
+    AlbumResponse getById(int albumId, Integer userId);
 
-    PageResponse<AlbumResponse> findByKeyword(String keyword, int page, int size, boolean asc);
+    PageResponse<AlbumResponse> findByKeyword(String keyword, int page, int size, boolean asc, Integer userId);
 
     AlbumResponse create(int userId, AlbumCreationRequest request);
 

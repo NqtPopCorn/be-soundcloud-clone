@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -29,8 +30,14 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Value("${app.upload-dir}")
     protected String uploadDir;
+    @Value("${app.image-base-url}")
+    protected String imageUploadBaseUrl;
+    @Value("${app.audio-base-url}")
+    protected String audioUploadBaseUrl;
+
     private Path rootDir;
     private final FileUploadRepository fileUploadRepository;
+
 
     @PostConstruct
     public void init() throws IOException {
@@ -44,15 +51,19 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Transactional
     public FileUpload storeFile(MultipartFile file, FileUpload.FileType fileType) {
         if (file == null || file.isEmpty()) return null;
+//        String baseUrl = fileType == FileUpload.FileType.audio ? audioUploadBaseUrl : imageUploadBaseUrl;
 
         try {
-            String filename = generateFilename(file);
-            Path destination = rootDir.resolve(fileType.name()).resolve(filename);
+            String uniqueName = generateFilename(file);
+            Path destination = rootDir.resolve(fileType.name()).resolve(uniqueName);
+            String url = (fileType == FileUpload.FileType.audio ? audioUploadBaseUrl : imageUploadBaseUrl) + uniqueName;
             var fileUpload = FileUpload.builder()
-                    .fileName(filename)
+                    .originalName(file.getOriginalFilename())
+                    .fileName(uniqueName)
                     .filePath(destination.toString())
                     .fileType(fileType)
-                    .uploadedAt(LocalDateTime.now())
+                    .size(file.getSize())
+                    .url(url)
                     .build();
             fileUploadRepository.save(fileUpload);
 
@@ -78,8 +89,8 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public String getFilePath(Integer id) {
-        return fileUploadRepository.findById(id)
+    public String getFilePath(String fileName) {
+        return fileUploadRepository.findByFileName(fileName)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.NOT_FOUND))
                 .getFilePath();
     }
@@ -103,7 +114,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private String generateFilename(MultipartFile file) {
         String originalFileName = Optional.ofNullable(file.getOriginalFilename()).orElse("file");
 
-        // Tách extension
+        // Lấy extension
         String extension = "";
         int dotIndex = originalFileName.lastIndexOf('.');
         if (dotIndex != -1) {
@@ -111,15 +122,16 @@ public class FileUploadServiceImpl implements FileUploadService {
             originalFileName = originalFileName.substring(0, dotIndex);
         }
 
+        // Rút gọn + sanitize
         int minLength = Math.min(originalFileName.length(), 20);
         String sanitized = originalFileName.trim()
-                .replaceAll("[^a-zA-Z0-9]", "%")
+                .replaceAll("[^a-zA-Z0-9]", "-")
                 .substring(0, minLength);
 
-        // Kết hợp với DateTime
-        var format = DateTimeFormatter.ofPattern("dd-MM-yyyy+HH-mm-ss");
-        return sanitized + "_" + LocalDateTime.now().format(format) + extension.toLowerCase();
+        // Gắn timestamp mili-giây
+        return sanitized + "_" + Instant.now().toEpochMilli() + extension.toLowerCase();
     }
+
 
 
 }

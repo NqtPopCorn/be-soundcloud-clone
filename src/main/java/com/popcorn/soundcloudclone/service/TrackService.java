@@ -1,6 +1,5 @@
 package com.popcorn.soundcloudclone.service;
 
-import com.popcorn.soundcloudclone.domain.dto.track.ArtistTrackResponse;
 import com.popcorn.soundcloudclone.domain.dto.track.TrackResponse;
 import com.popcorn.soundcloudclone.domain.dto.track.TrackCreationRequest;
 import com.popcorn.soundcloudclone.domain.dto.track.TrackUpdateRequest;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 public interface TrackService {
     // create, update, delete, getPage
     // getByUserId(include private): cho user service lam ? nah
-    ArtistTrackResponse createTrack(int userId, TrackCreationRequest request);
+    TrackResponse createTrack(int userId, TrackCreationRequest request);
     boolean updateTrack(int trackId, TrackUpdateRequest request);
     boolean deleteTrack(int trackId);
     PageResponse<TrackResponse> getPage(
@@ -27,7 +26,7 @@ public interface TrackService {
             Track.Privacy privacy,
             Pageable pageable
     );
-    PageResponse<ArtistTrackResponse> getArtistTrackPage(
+    PageResponse<TrackResponse> getArtistTrackPage(
             String keyword,
             String username,
             Track.Privacy privacy,

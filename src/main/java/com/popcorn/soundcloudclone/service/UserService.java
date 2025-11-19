@@ -8,15 +8,12 @@ public interface UserService {
 
     UserResponse createRequest(UserCreationRequest request);
 
-    /**
-     * Update user without role
-     */
     UserResponse createAdminRequest(AdminCreationUserRequest request);
 
     PageResponse<UserResponse> getPageUsers(String keyword, int page, int size, String sort);
 
-    UserResponse userGetInfo(int id);
-    UserResponse userGetInfoByUsername(String username);
+    UserResponse getUserProfileById(int id);
+    UserResponse getUserProfileByUsername(String username);
 
     UserResponse updateUser(int userId, UserUpdateRequest request);
 

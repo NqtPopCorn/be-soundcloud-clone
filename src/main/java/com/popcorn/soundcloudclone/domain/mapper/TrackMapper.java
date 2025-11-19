@@ -4,8 +4,7 @@ import com.popcorn.soundcloudclone.domain.dto.track.*;
 import com.popcorn.soundcloudclone.domain.entity.AlbumTrack;
 import com.popcorn.soundcloudclone.domain.entity.Genre;
 import com.popcorn.soundcloudclone.domain.entity.Track;
-import com.popcorn.soundcloudclone.dto.track.*;
-import com.popcorn.soundcloudclone.entity.*;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.*;
 
@@ -21,8 +20,9 @@ public abstract class TrackMapper {
     // method gốc chứa config chung
     @Mapping(target = "genres", source = ".", qualifiedByName = "getGenres")
     @Mapping(target = "tags", source = ".", qualifiedByName = "splitTags")
-    @Mapping(target = "audioUrl", source = ".", qualifiedByName = "getAudioUrl")
-    @Mapping(target = "imageUrl", source = "imageUpload", qualifiedByName = "getImageUrl")
+    @Mapping(target = "audioUrl", source = "audioUpload.url")
+    @Mapping(target = "imageUrl", source = "imageUpload.url")
+    @Mapping(target = "privacy", expression = "java(track.getPrivacy().toString())")
     protected abstract TrackResponse toTrackResponseBase(Track track);
 
     @InheritConfiguration(name = "toTrackResponseBase")
@@ -32,14 +32,10 @@ public abstract class TrackMapper {
     @InheritConfiguration(name = "toTrackResponseBase")
     public abstract TrackResponse toTrackResponse(Track track);
 
-    @InheritConfiguration(name = "toTrackResponseBase")
-    @Mapping(target = "privacy", expression = "java(track.getPrivacy().toString())")
-    public abstract ArtistTrackResponse toArtistTrackResponse(Track track);
-
     @Mapping(target = "genres", source = "track", qualifiedByName = "getGenres")
     @Mapping(target = "tags", source = "track", qualifiedByName = "splitTags")
-    @Mapping(target = "audioUrl", source = "track", qualifiedByName = "getAudioUrl")
-    @Mapping(target = "imageUrl", source = "track.imageUpload", qualifiedByName = "getImageUrl")
+    @Mapping(target = "audioUrl", source = "track.audioUpload.url")
+    @Mapping(target = "imageUrl", source = "track.imageUpload.url")
     @Mapping(target = "isLiked", expression = "java(likedTrackIds.contains(albumTrack.getTrack().getId()))")
     @Mapping(target = ".", source = "track")
     public abstract TrackItemResponse toTrackItemResponse(AlbumTrack albumTrack, @Context List<Integer> likedTrackIds);

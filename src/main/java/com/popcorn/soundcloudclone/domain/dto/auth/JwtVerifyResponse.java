@@ -10,11 +10,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Builder
-public class IntrospectResponse {
+public class JwtVerifyResponse {
     boolean valid;
     Integer userId;
     String username;
     String authorities;
-    String message;
-
+    String errorMessage;
+    int statusCode;
 }
