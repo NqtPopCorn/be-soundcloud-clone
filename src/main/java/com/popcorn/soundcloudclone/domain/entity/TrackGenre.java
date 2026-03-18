@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "track_genre")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class TrackGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

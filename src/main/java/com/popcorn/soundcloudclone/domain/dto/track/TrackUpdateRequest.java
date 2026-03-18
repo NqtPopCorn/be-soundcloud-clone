@@ -17,10 +17,10 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TrackUpdateRequest {
-    @NotBlank(message = "INVALID_TRACK_NAME")
+    @Size(min = 3, max = 30, message = "INVALID_TRACK_NAME")
     String name;
 
-    @NotBlank(message = "INVALID_PRIVACY")
+    @Size(min = 3, max = 30, message = "INVALID_PRIVACY")
     @Pattern(regexp = "^PUBLIC|PRIVATE$", message = "INVALID_PRIVACY")
     String privacy;
 
@@ -34,7 +34,6 @@ public class TrackUpdateRequest {
     @FileExtension(values = ".jpeg, .png, .jpg")
     MultipartFile imageUpload;
 
-    @Size(min = 1, message = "INVALID_GENRE")
     List<Integer> genreIds = new ArrayList<>();
 
 }

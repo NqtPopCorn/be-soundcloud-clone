@@ -14,20 +14,19 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class UserUpdateRequest {
-    @NotBlank(message = "INVALID_USERNAME")
+    @Size(min = 3, max = 30, message = "INVALID_USERNAME")
     String username;
 
     @Email(message = "INVALID_EMAIL")
     String email;
 
-    @Nullable
     @Size(min = 6, max = 255, message = "INVALID_PASSWORD")
     String password;
 
-    @NotBlank(message = "INVALID_FIRSTNAME")
+    @Size(min = 3, max = 30, message = "INVALID_FIRSTNAME")
     private String firstName;
 
-    @NotBlank(message = "INVALID_LASTNAME")
+    @Size(min = 3, max = 30, message = "INVALID_LASTNAME")
     private String lastName;
 
     MultipartFile avatarUpload, backgroundUpload;

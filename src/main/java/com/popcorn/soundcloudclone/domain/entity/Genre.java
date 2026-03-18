@@ -23,6 +23,6 @@ public class Genre {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "genres")
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
     private List<Track> tracks = new ArrayList<>();
 }

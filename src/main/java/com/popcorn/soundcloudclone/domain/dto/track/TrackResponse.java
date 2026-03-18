@@ -1,6 +1,7 @@
 package com.popcorn.soundcloudclone.domain.dto.track;
 
 import com.popcorn.soundcloudclone.domain.dto.user.UserSummaryResponse;
+import com.popcorn.soundcloudclone.domain.entity.Track;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -39,6 +40,6 @@ public class TrackResponse {
 
     List<String> tags;
 
-    String privacy;
+    Track.Privacy privacy;
 
 }

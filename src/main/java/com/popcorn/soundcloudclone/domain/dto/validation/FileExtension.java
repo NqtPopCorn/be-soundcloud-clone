@@ -7,7 +7,8 @@ import java.lang.annotation.*;
 
 /**
  * Validate multipart file extension with a string as values. <br>
- * Example: @FileExtension(values = ".jpeg, .png, .mp3"
+ * Example: @FileExtension(values = ".jpeg, .png, .mp3" <br>
+ * {@code null} elements are considered valid.
  */
 @Documented
 @Constraint(validatedBy = FileExtensionValidator.class)

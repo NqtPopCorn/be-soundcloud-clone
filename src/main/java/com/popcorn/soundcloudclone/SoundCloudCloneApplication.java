@@ -8,13 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SoundCloudCloneApplication {
 
-
 	public static void main(String[] args) {
-		var context = SpringApplication.run(SoundCloudCloneApplication.class, args);
+		SpringApplication.run(SoundCloudCloneApplication.class, args);
 
 		// tao user ban dau
 
 	}
-
 
 }

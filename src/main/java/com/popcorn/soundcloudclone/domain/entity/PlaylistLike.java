@@ -1,5 +1,7 @@
 package com.popcorn.soundcloudclone.domain.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "playlist_like_log", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"playlist_id", "user_id"}, name = "unique_playlist_user")
+        @UniqueConstraint(columnNames = { "playlist_id", "user_id" }, name = "unique_playlist_user")
 })
 public class PlaylistLike {
     @Id
@@ -26,4 +28,12 @@ public class PlaylistLike {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

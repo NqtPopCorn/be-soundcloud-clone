@@ -24,38 +24,27 @@ public class Track {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "artist_id")
     private User artist;
 
-    @ManyToOne // OneToOne ???
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "audio_upload_id", nullable = false)
     private FileUpload audioUpload;
 
-    @ManyToOne // OneToOne ???
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "image_upload_id", nullable = false)
     private FileUpload imageUpload;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "privacy", nullable = false)
-    private Privacy privacy = Privacy.PUBLIC;
+    private Privacy privacy;
 
-    @ManyToMany(mappedBy = "likedTracks")
-    private List<User> likedByUsers = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable(
-            name = "track_genre",
-            joinColumns = @JoinColumn(name = "track_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "track_genre", joinColumns = @JoinColumn(name = "track_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status = Status.PUBLISHED;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
@@ -64,22 +53,19 @@ public class Track {
     private int likeCount = 0;
     private int duration;
     private String description;
-    private String tags = "";
+    private String tags;
 
-    private LocalDate uploadDate ;
+    private LocalDate uploadDate;
     private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {
         uploadDate = LocalDate.now();
+        privacy = Privacy.PUBLIC;
     }
 
     public enum Privacy {
         PUBLIC, PRIVATE
-    }
-
-    public enum Status {
-        DRAFT, PUBLISHED, SUSPENDED
     }
 
 }

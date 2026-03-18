@@ -1,0 +1,52 @@
+package com.popcorn.soundcloudclone.domain.service.impl;
+
+import com.popcorn.soundcloudclone.domain.dto.track.GenreResponse;
+import com.popcorn.soundcloudclone.domain.entity.Genre;
+import com.popcorn.soundcloudclone.exception.ApplicationException;
+import com.popcorn.soundcloudclone.exception.ErrorCode;
+import com.popcorn.soundcloudclone.mapper.GenreMapper;
+import com.popcorn.soundcloudclone.domain.repository.GenreRepository;
+import com.popcorn.soundcloudclone.domain.repository.TrackGenreRepository;
+import com.popcorn.soundcloudclone.domain.service.GenreService;
+
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class GenreServiceImpl implements GenreService {
+    private GenreRepository genreRepository;
+    private GenreMapper genreMapper;
+    private TrackGenreRepository trackGenreRepository;
+
+    @Override
+    public GenreResponse findByName(String name) {
+        return genreMapper.toResponse(genreRepository.findByName(name)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.TAG_NOT_FOUND)));
+    }
+
+    @Override
+    public GenreResponse create(String tagName) {
+        return genreMapper.toResponse(genreRepository.save(
+                Genre.builder().name(tagName).build()));
+    }
+
+    @Override
+    @Transactional
+    public int delete(int genreId) {
+        Genre found = genreRepository.findById(genreId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.TAG_NOT_FOUND));
+        trackGenreRepository.deleteAllByGenreId(genreId);
+        genreRepository.delete(found);
+        return 1;
+    }
+
+    @Override
+    public List<GenreResponse> findAll() {
+        return genreMapper.toListResponse(genreRepository.findAll());
+    }
+
+}

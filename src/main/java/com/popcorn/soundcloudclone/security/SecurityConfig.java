@@ -1,6 +1,5 @@
 package com.popcorn.soundcloudclone.security;
 
-import com.popcorn.soundcloudclone.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.popcorn.soundcloudclone.domain.repository.UserRepository;
+
 import java.util.List;
 
 @Configuration
@@ -26,26 +27,23 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception { //,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter)
+            throws Exception { // ,
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // khong luu session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // khong
+                                                                                                              // luu
+                                                                                                              // session
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .permitAll()
                         .requestMatchers("/public/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT,"/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH,"/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"/**").authenticated()
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint())
-                        .accessDeniedHandler(accessDeniedHandler())
-                )
+                        .accessDeniedHandler(accessDeniedHandler()))
                 .build();
     }
 
@@ -73,8 +71,8 @@ public class SecurityConfig {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("""
-            {"statusCode":401, "message":"Bạn chưa đăng nhập hoặc token hết hạn"}
-        """);
+                        {"statusCode":401, "message":"Bạn chưa đăng nhập hoặc token hết hạn"}
+                    """);
         };
     }
 
@@ -84,8 +82,8 @@ public class SecurityConfig {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("""
-            {"statusCode":403, "message":"Bạn không có quyền truy cập"}
-        """);
+                        {"statusCode":403, "message":"Bạn không có quyền truy cập"}
+                    """);
         };
     }
 

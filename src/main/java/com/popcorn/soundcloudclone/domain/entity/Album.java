@@ -34,11 +34,13 @@ public class Album {
 
     @ManyToOne
     @JoinColumn(name = "cover_upload_id")
-    private FileUpload coverUpload;
+    private FileUpload coverImage;
 
     @OneToMany(mappedBy = "album")
     private List<AlbumTrack> joinTracks;
 
     @Column
     private LocalDate releaseDate;
+
+    private int likeCount = 0;
 }

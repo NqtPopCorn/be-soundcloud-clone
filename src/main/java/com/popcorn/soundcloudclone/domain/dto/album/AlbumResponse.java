@@ -10,7 +10,8 @@ import java.util.List;
 
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 public class AlbumResponse {
     int id;
@@ -21,4 +22,6 @@ public class AlbumResponse {
     List<String> tags;
     LocalDate releaseDate;
     List<TrackItemResponse> tracks;
+    int likeCount;
+    boolean liked;
 }

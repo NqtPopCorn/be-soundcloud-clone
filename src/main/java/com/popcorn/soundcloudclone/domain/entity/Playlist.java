@@ -24,15 +24,12 @@ public class Playlist {
     private User creator;
 
     @OneToMany(mappedBy = "playlist")
-//    @JoinTable(
-//            name = "playlist_track",
-//            joinColumns = @JoinColumn(name = "playlist_id"),
-//            inverseJoinColumns = @JoinColumn(name = "track_id")
-//    )
-    private List<PlaylistTrack> tracks;
+    private List<PlaylistTrack> joinTracks;
 
     @Column
     private String name;
 
     private Boolean isPublic = false;
+
+    private int likeCount = 0;
 }

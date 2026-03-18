@@ -9,9 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PlaylistUpdateRequest {
-    @NotBlank
     String name;
 
-    @NotNull
     Boolean isPublic;
 }

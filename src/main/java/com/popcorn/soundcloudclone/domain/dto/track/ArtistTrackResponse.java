@@ -1,5 +1,6 @@
 package com.popcorn.soundcloudclone.domain.dto.track;
 
+import com.popcorn.soundcloudclone.domain.entity.Track;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,5 +11,5 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 public class ArtistTrackResponse extends TrackResponse {
-    private String privacy;
+    private Track.Privacy privacy;
 }

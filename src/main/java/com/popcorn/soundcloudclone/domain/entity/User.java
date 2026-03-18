@@ -36,15 +36,20 @@ public class User {
     private String firstName;
     @Column(nullable = false)
     private String lastName;
-    @Column
     private String city;
-    @Column
     private String country;
-    @Column
     private String stageName;
     private int followersCount = 0;
     private int followingCount = 0;
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+    public enum Status {
+        ACTIVE, INACTIVE
+    }
+
     @Column(columnDefinition = "TEXT")
     private String bio;
     @Enumerated(EnumType.STRING)
@@ -69,7 +74,31 @@ public class User {
     )
     private List<Track> likedTracks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creator")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "album_like_log",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "album_id")
+    )
+    private List<Album> likedAlbums = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "playlist_like_log",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "playlist_id")
+    )
+    private List<Playlist> likedPlaylists = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_followers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id")
+    )
+    private List<User> followingUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     private List<Playlist> playlists = new ArrayList<>();
 
     @PrePersist

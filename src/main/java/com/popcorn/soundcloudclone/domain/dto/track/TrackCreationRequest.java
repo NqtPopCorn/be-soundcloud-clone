@@ -1,6 +1,7 @@
 package com.popcorn.soundcloudclone.domain.dto.track;
 
 import com.popcorn.soundcloudclone.domain.dto.validation.FileExtension;
+import com.popcorn.soundcloudclone.domain.entity.Track;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Getter;
