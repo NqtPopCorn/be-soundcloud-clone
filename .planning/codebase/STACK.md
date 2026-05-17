@@ -3,7 +3,7 @@
 **Date:** 2026-05-10
 
 ## Core Technologies
-- **Language:** Java 17
+- **Language:** Java 21
 - **Framework:** Spring Boot 3.5.0
 - **Build Tool:** Maven
 

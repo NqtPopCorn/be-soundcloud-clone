@@ -1,5 +1,9 @@
-HELP.md
+.planning
+.agent
+.roo
 uploads/
+
+src/main/resources/application-dev.properties
 
 target/
 .mvn/wrapper/maven-wrapper.jar
