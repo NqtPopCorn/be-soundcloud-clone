@@ -57,7 +57,7 @@ public class AlbumController {
         }
 
         @PostMapping
-        @PreAuthorize("hasAnyRole('ADMIN', 'ARTIST')")
+        @PreAuthorize("isAuthenticated()")
         public ResponseEntity<ApiResponse<AlbumResponse>> addAlbum(@AuthenticationPrincipal MyUserDetails user,
                         @RequestBody @Valid AlbumCreationRequest request) {
                 Integer userId = user.getUserId();

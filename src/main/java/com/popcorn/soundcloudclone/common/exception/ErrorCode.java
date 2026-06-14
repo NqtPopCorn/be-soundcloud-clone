@@ -39,6 +39,7 @@ public enum ErrorCode {
     INVALID_METHOD(208, 400, "Method is invalid"),
 
     // Lỗi bảo mật/Quyền hạn
+    BAD_REQUEST(300, 400, "Bad Request"),
     UNAUTHORIZED(401, 401, "Unauthorized"), // Chưa đăng nhập hoặc Token sai
     UNAUTHENTICATED(402, 401, "Unauthenticated"), // Tương tự Unauthorized
     FORBIDDEN(403, 403, "Forbidden, due to not allowed or inactive account"), // Đã đăng nhập nhưng không có quyền

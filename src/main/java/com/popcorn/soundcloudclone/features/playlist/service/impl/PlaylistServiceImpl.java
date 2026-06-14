@@ -25,6 +25,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     // private final FavoriteService favoriteService;
 
     @Override
+    @Cacheable(value = "playlists", key = "#id")
     public PlaylistResponse getById(int id, int userId) {
         return playlistMapper.toPlaylistResponse(findPlaylistByIdOrThrow(id));
     }
@@ -92,6 +95,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
+    @CacheEvict(value = "playlists", key = "#id")
     public void patchUpdatePlaylist(int id, PlaylistUpdateRequest request) {
         var playlist = playlistRepository.findById(id).orElseThrow(() -> new RuntimeException("Playlist not found"));
         playlistMapper.patchUpdate(playlist, request);
@@ -99,6 +103,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
+    @CacheEvict(value = "playlists", key = "#id")
     public void updatePlaylistTracks(int id, List<Integer> trackIds) {
         Playlist playlist = findPlaylistByIdOrThrow(id);
 
@@ -123,6 +128,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "playlists", key = "#playlistId")
     public void addTracksToPlaylist(int playlistId, List<Integer> trackIds) {
         var tracks = trackRepository.findByIdIn(trackIds);
         var playlist = findPlaylistByIdOrThrow(playlistId);
@@ -143,6 +149,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
+    @CacheEvict(value = "playlists", key = "#id")
     public void deletePlaylist(int id) {
         var playlist = findPlaylistByIdOrThrow(id);
 

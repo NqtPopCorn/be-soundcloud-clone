@@ -1,17 +1,17 @@
 package com.popcorn.soundcloudclone.features.user.service.impl;
 
 import com.popcorn.soundcloudclone.features.album.entity.Album;
-import com.popcorn.soundcloudclone.features.album.entity.AlbumLike;
-import com.popcorn.soundcloudclone.features.album.repository.AlbumLikeRepo;
 import com.popcorn.soundcloudclone.features.album.repository.AlbumRepository;
 import com.popcorn.soundcloudclone.features.playlist.entity.Playlist;
-import com.popcorn.soundcloudclone.features.playlist.entity.PlaylistLike;
-import com.popcorn.soundcloudclone.features.playlist.repository.PlaylistLikeRepo;
 import com.popcorn.soundcloudclone.features.playlist.repository.PlaylistRepository;
 import com.popcorn.soundcloudclone.features.track.entity.Track;
-import com.popcorn.soundcloudclone.features.track.entity.TrackLike;
-import com.popcorn.soundcloudclone.features.track.repository.TrackLikeRepository;
 import com.popcorn.soundcloudclone.features.track.repository.TrackRepository;
+import com.popcorn.soundcloudclone.features.user.entity.AlbumLike;
+import com.popcorn.soundcloudclone.features.user.entity.PlaylistLike;
+import com.popcorn.soundcloudclone.features.user.entity.TrackLike;
+import com.popcorn.soundcloudclone.features.user.repository.AlbumLikeRepo;
+import com.popcorn.soundcloudclone.features.user.repository.PlaylistLikeRepo;
+import com.popcorn.soundcloudclone.features.user.repository.TrackLikeRepository;
 import com.popcorn.soundcloudclone.features.user.service.FavoriteAlbumService;
 import com.popcorn.soundcloudclone.features.user.service.FavoritePlaylistService;
 import com.popcorn.soundcloudclone.features.user.service.FavoriteTrackService;
@@ -33,6 +33,8 @@ import com.popcorn.soundcloudclone.features.track.mapper.TrackMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -56,14 +58,45 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
     private final CurrentUserContext currentUserContext;
 
     @Override
+    @Cacheable(value = "likedTrackIds", key = "#userId", unless = "#result == null || #result.isEmpty()")
     public Set<Integer> getLikedTrackIds(Integer userId) {
         if (userId == null)
             return new HashSet<>();
-        return trackLikeRepository.getLikedTrackIds(userId).orElse(new HashSet<>());
+
+        return trackLikeRepository
+                .getLikedTrackIds(userId)
+                .orElse(new HashSet<>());
+    }
+
+    @Override
+    @Cacheable(value = "likedAlbumIds", key = "#userId", unless = "#result == null || #result.isEmpty()")
+    public Set<Integer> getLikedAlbumIds(Integer userId) {
+
+        if (userId == null) {
+            return new HashSet<>();
+        }
+
+        return albumLikeRepo
+                .getLikedAlbumIds(userId)
+                .orElse(new HashSet<>());
+    }
+
+    @Override
+    @Cacheable(value = "likedPlaylistIds", key = "#userId", unless = "#result == null || #result.isEmpty()")
+    public Set<Integer> getLikedPlaylistIds(Integer userId) {
+
+        if (userId == null) {
+            return new HashSet<>();
+        }
+
+        return playlistLikeRepo
+                .getLikedPlaylistIds(userId)
+                .orElse(new HashSet<>());
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "likedTrackIds", key = "#userId")
     public void toggleLikeTrack(int userId, int trackId, boolean liked) {
         if (liked) {
             Track track = findTrackByIdOrThrow(trackId);
@@ -87,6 +120,7 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
 
     @Override
     @Transactional
+    @CacheEvict(value = "likedPlaylistIds", key = "#userId")
     public void toggleLikePlaylist(int userId, int playlistId, boolean liked) {
 
         if (liked) {
@@ -111,11 +145,16 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
 
     @Override
     @Transactional
+    @CacheEvict(value = "likedAlbumIds", key = "#userId")
     public void toggleLikeAlbum(int userId, int albumId, boolean liked) {
 
         if (liked) {
             Album album = findAlbumByIdOrThrow(albumId);
             User user = findUserOrThrow(userId);
+            var existingLike = albumLikeRepo.findByAlbumIdAndUserId(albumId, userId);
+            if (existingLike.isPresent()) {
+                throw new ApplicationException("Already liked", ErrorCode.BAD_REQUEST);
+            }
             AlbumLike albumLike = AlbumLike.builder()
                     .album(album)
                     .user(user)
@@ -152,22 +191,6 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
 
     private User findUserOrThrow(int userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    @Override
-    public Set<Integer> getLikedAlbumIds(Integer userId) {
-        if (userId == null) {
-            return new HashSet<>();
-        }
-        return albumLikeRepo.getLikedAlbumIds(userId).orElse(new HashSet<>());
-    }
-
-    @Override
-    public Set<Integer> getLikedPlaylistIds(Integer userId) {
-        if (userId == null) {
-            return new HashSet<>();
-        }
-        return playlistLikeRepo.getLikedPlaylistIds(userId).orElse(new HashSet<>());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.popcorn.soundcloudclone.features.user.service.impl;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +28,7 @@ public class ProfileMediaServiceImpl implements ProfileMediaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"users", "usersByUsername"}, allEntries = true)
     public void updateAvatar(int userId, MultipartFile upload) {
         var user = findUserByIdOrThrow(userId);
         String existing = user.getAvatarUrl();
@@ -39,6 +41,7 @@ public class ProfileMediaServiceImpl implements ProfileMediaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"users", "usersByUsername"}, allEntries = true)
     public void updateBackgroundImage(int userId, MultipartFile upload) {
         var user = findUserByIdOrThrow(userId);
         String existing = user.getBackgroundUrl();
@@ -61,6 +64,7 @@ public class ProfileMediaServiceImpl implements ProfileMediaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"users", "usersByUsername"}, allEntries = true)
     public void deleteAvatar(int userId) {
         var user = findUserByIdOrThrow(userId);
         var avatar = user.getAvatarUrl();
@@ -73,6 +77,7 @@ public class ProfileMediaServiceImpl implements ProfileMediaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"users", "usersByUsername"}, allEntries = true)
     public void deleteBackgroundImage(int userId) {
         var user = findUserByIdOrThrow(userId);
         var background = user.getBackgroundUrl();

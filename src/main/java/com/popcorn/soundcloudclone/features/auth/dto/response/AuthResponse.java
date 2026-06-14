@@ -6,10 +6,12 @@ import com.popcorn.soundcloudclone.features.users.dto.response.UserResponse;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
@@ -24,3 +26,5 @@ public class AuthResponse {
 
     UserResponse user;
 }
+
+

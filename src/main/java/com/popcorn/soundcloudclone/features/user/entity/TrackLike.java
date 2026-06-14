@@ -1,11 +1,4 @@
-package com.popcorn.soundcloudclone.features.album.entity;
-
-import java.time.LocalDateTime;
-
-import org.springframework.cglib.core.Local;
-import org.springframework.data.annotation.CreatedDate;
-
-import com.popcorn.soundcloudclone.features.users.entity.User;
+package com.popcorn.soundcloudclone.features.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,25 +6,33 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedBy;
+
+import com.popcorn.soundcloudclone.features.track.entity.Track;
+import com.popcorn.soundcloudclone.features.users.entity.User;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "album_like_log", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "album_id", "user_id" }, name = "unique_album_user")
+@Table(name = "track_like_log", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "track_id", "user_id" }, name = "unique_track_user")
 })
-public class AlbumLike {
+public class TrackLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "album_id")
-    private Album album;
+    @JoinColumn(name = "track_id")
+    private Track track;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @CreatedBy
     private User user;
 
     @Column(updatable = false, nullable = false)
@@ -41,5 +42,4 @@ public class AlbumLike {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
 }

@@ -73,13 +73,14 @@ public class PlaylistController {
 
         @PostMapping
         @PreAuthorize("principal != null && isAuthenticated()")
-        public ResponseEntity<ApiResponse> addPlaylist(@AuthenticationPrincipal MyUserDetails principal,
+        public ResponseEntity<ApiResponse<PlaylistResponse>> addPlaylist(@AuthenticationPrincipal MyUserDetails principal,
                         @RequestBody @Valid PlaylistCreationRequest request) {
                 int userId = principal.getUserId();
-                playlistService.create(userId, request);
-                return ResponseEntity.ok(ApiResponse.builder()
+                PlaylistResponse created = playlistService.create(userId, request);
+                return ResponseEntity.ok(ApiResponse.<PlaylistResponse>builder()
                                 .statusCode(200)
                                 .message("Create successfully")
+                                .result(created)
                                 .build());
         }
 

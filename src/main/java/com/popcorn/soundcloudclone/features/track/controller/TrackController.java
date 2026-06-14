@@ -63,7 +63,7 @@ public class TrackController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // @PreAuthorize("hasAnyRole('ADMIN', 'ARTIST')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<TrackResponse>> addTrack(@AuthenticationPrincipal MyUserDetails userDetails,
             @ModelAttribute @Valid TrackCreationRequest request) {
         var track = trackService.createTrack(userDetails.getUserId(), request);

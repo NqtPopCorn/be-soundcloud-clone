@@ -1,7 +1,6 @@
 package com.popcorn.soundcloudclone.features.user.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data

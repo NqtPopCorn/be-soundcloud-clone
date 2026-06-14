@@ -1,11 +1,12 @@
-package com.popcorn.soundcloudclone.features.track.repository;
+package com.popcorn.soundcloudclone.features.user.repository;
 
-import com.popcorn.soundcloudclone.features.track.entity.TrackLike;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.popcorn.soundcloudclone.features.user.entity.TrackLike;
 
 import java.util.Optional;
 import java.util.Set;

@@ -23,6 +23,8 @@ import com.popcorn.soundcloudclone.features.album.mapper.AlbumMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,8 @@ public class AlbumServiceImpl implements AlbumService {
     private final String ALBUM_FOLDER = "soundcloud/album";
 
     @Override
+    @Transactional
+    @Cacheable(value = "albums", key = "#albumId")
     public AlbumResponse getById(int albumId, Integer userId) { // lay tat ca
         var album = findAlbumByIdOrThrow(albumId);
 
@@ -56,6 +60,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
+    @Transactional
     public PageResponse<AlbumResponse> findByFilter(AlbumFilterRequestDto dto,
             Pageable pageable) {
         var spec = AlbumSpecification.keywordContains(dto.getKeyword())
@@ -88,6 +93,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "albums", key = "#id")
     public void updateAlbum(int id, AlbumUpdateRequest request) {
         var album = findAlbumByIdOrThrow(id);
         albumMapper.updateAlbum(album, request);
@@ -106,6 +112,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "albums", key = "#albumId")
     public void updateAlbumTracks(int albumId, List<Integer> trackIds) {
         Album album = findAlbumByIdOrThrow(albumId);
 
@@ -131,6 +138,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "albums", key = "#albumId")
     public void addTracksToAlbum(int albumId, List<Integer> trackIds) {
         var tracks = trackRepository.findByIdIn(trackIds);
         var album = findAlbumByIdOrThrow(albumId);
@@ -148,6 +156,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "albums", key = "#id")
     public void deleteAlbum(int id) {
         var album = findAlbumByIdOrThrow(id);
         var coverImage = album.getCoverImageUrl();

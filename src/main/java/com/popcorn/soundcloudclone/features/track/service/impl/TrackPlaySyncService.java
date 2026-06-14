@@ -1,9 +1,6 @@
 package com.popcorn.soundcloudclone.features.track.service.impl;
 
-import com.popcorn.soundcloudclone.features.track.entity.TrackPlay;
-import com.popcorn.soundcloudclone.features.track.repository.TrackPlayRepository;
 import com.popcorn.soundcloudclone.features.track.repository.TrackRepository;
-import com.popcorn.soundcloudclone.features.users.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +9,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -13,6 +13,9 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,10 +25,12 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
 
+    @Cacheable(value = "users", key = "#id")
     public UserResponse getUserProfileById(int id) {
         return userMapper.toUserResponse(findUserByIdOrThrow(id));
     }
 
+    @Cacheable(value = "usersByUsername", key = "#username")
     public UserResponse getUserProfileByUsername(String username) {
         var found = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApplicationException("User not found with username: " + username,
@@ -39,6 +44,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
+    @CachePut(value = "users", key = "#userId")
+    @CacheEvict(value = "usersByUsername", key = "#result.username")
     public UserResponse patchUpdateUser(int userId, UserUpdateRequest request) {
         User user = findUserByIdOrThrow(userId);
         // dung mapper de map, ignore avatar, password, background

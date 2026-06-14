@@ -1,6 +1,7 @@
 package com.popcorn.soundcloudclone.features.track.entity;
 
 import com.popcorn.soundcloudclone.features.genre.entity.Genre;
+import com.popcorn.soundcloudclone.features.user.entity.TrackLike;
 import com.popcorn.soundcloudclone.features.users.entity.User;
 
 import jakarta.persistence.*;
@@ -48,6 +49,14 @@ public class Track {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
+
+    @OneToMany(mappedBy = "track", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    private List<TrackPlay> logs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "track", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    private List<TrackLike> likes = new ArrayList<>();
 
     private String name;
     private int playCount = 0;

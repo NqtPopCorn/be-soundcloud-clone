@@ -4,6 +4,7 @@ import com.popcorn.soundcloudclone.features.track.dto.response.TrackResponse;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PUBLIC)
@@ -19,3 +21,5 @@ public class GenreResponse {
     String name;
 //    List<TrackResponse> tracks;
 }
+
+

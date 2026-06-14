@@ -15,24 +15,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = RuntimeException.class)
-    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ApiResponse> handleException(Exception e) {
         ApiResponse body = ApiResponse.builder()
-                .message("Internal Server Error")
-                .statusCode(500)
+                .message(e.toString() + " - " + e.getMessage())
+                .statusCode(ErrorCode.BAD_REQUEST.getCode())
                 .build();
-        e.printStackTrace(System.err);
+        log.error("Internal Server Error: ", e);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = AuthorizationDeniedException.class)
     public ResponseEntity<ApiResponse> handleAuthorizationException(AuthorizationDeniedException e) {
         ApiResponse body = ApiResponse.builder()
-                .message("Unauthorized")
-                .statusCode(ErrorCode.UNAUTHORIZED.getCode())
+                .message("Forbidden")
+                .statusCode(ErrorCode.FORBIDDEN.getCode())
                 .build();
         log.error("Unauthorized access: {}", e.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = ApplicationException.class)

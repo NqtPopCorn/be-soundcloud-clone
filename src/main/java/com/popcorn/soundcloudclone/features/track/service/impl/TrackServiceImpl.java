@@ -8,7 +8,6 @@ import com.popcorn.soundcloudclone.features.track.dto.request.TrackUpdateRequest
 import com.popcorn.soundcloudclone.features.track.dto.response.TrackResponse;
 import com.popcorn.soundcloudclone.features.track.entity.Track;
 import com.popcorn.soundcloudclone.features.track.entity.TrackPlay;
-import com.popcorn.soundcloudclone.features.track.repository.TrackLikeRepository;
 import com.popcorn.soundcloudclone.features.track.repository.TrackPlayRepository;
 import com.popcorn.soundcloudclone.features.track.repository.TrackRepository;
 import com.popcorn.soundcloudclone.features.track.service.TrackService;
@@ -22,6 +21,9 @@ import com.popcorn.soundcloudclone.common.security.CurrentUserContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -76,7 +78,7 @@ public class TrackServiceImpl implements TrackService {
             Pageable pageable) {
 
         Track.Privacy privacy = Track.Privacy.PUBLIC;
-        if (filterReq.getArtistId() == currentUserContext.getCurrentUserId()) {
+        if (filterReq.getArtistId() != null && filterReq.getArtistId().equals(currentUserContext.getCurrentUserId())) {
             privacy = null; // all privacy
         }
         Specification<Track> mainSpec = TrackSpecification
@@ -98,6 +100,7 @@ public class TrackServiceImpl implements TrackService {
     }
 
     @Override
+    @Cacheable(value = "tracks", key = "#trackId")
     public TrackResponse getTrackResponse(int trackId) {
         return trackMapper.toTrackResponse(findTrackByIdOrThrow(trackId));
     }
@@ -112,6 +115,7 @@ public class TrackServiceImpl implements TrackService {
 
     @Override
     @Transactional
+    @CachePut(value = "tracks", key = "#id")
     public TrackResponse updateTrack(int id, TrackUpdateRequest request) {
         Track track = findTrackByIdOrThrow(id);
         trackMapper.updateTrack(track, request);
@@ -139,6 +143,7 @@ public class TrackServiceImpl implements TrackService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tracks", key = "#trackId")
     public void deleteTrack(int trackId) {
         var track = trackRepository.findById(trackId).orElseThrow(() -> new RuntimeException("Track not found"));
         // Delete from Cloudinary before removing DB record

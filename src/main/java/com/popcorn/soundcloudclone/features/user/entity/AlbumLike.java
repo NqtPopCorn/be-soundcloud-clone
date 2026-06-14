@@ -1,7 +1,11 @@
-package com.popcorn.soundcloudclone.features.playlist.entity;
+package com.popcorn.soundcloudclone.features.user.entity;
 
 import java.time.LocalDateTime;
 
+import org.springframework.cglib.core.Local;
+import org.springframework.data.annotation.CreatedDate;
+
+import com.popcorn.soundcloudclone.features.album.entity.Album;
 import com.popcorn.soundcloudclone.features.users.entity.User;
 
 import jakarta.persistence.*;
@@ -15,17 +19,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "playlist_like_log", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "playlist_id", "user_id" }, name = "unique_playlist_user")
+@Table(name = "album_like_log", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "album_id", "user_id" }, name = "unique_album_user")
 })
-public class PlaylistLike {
+public class AlbumLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "playlist_id")
-    private Playlist playlist;
+    @JoinColumn(name = "album_id")
+    private Album album;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -38,4 +42,5 @@ public class PlaylistLike {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
 }

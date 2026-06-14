@@ -45,7 +45,7 @@ public class FavoriteTrackController {
                 return ResponseEntity.ok(body);
         }
 
-        @PostMapping("/{trackId}")
+        @PostMapping()
         @PreAuthorize("isAuthenticated() && #userDetails != null")
         public ResponseEntity<ApiResponse> togglelikeTrack(
                         @Valid @RequestBody LikeResquest dto,

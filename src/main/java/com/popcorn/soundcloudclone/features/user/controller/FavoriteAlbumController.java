@@ -40,7 +40,7 @@ public class FavoriteAlbumController {
                 return ResponseEntity.ok(body);
         }
 
-        @PostMapping("/{albumId}")
+        @PostMapping()
         @PreAuthorize("isAuthenticated() && #userDetails != null")
         public ResponseEntity<ApiResponse> likeAlbum(
                         @Valid @RequestBody LikeResquest dto,

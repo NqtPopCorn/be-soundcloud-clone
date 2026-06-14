@@ -47,7 +47,7 @@ public class FavoritePlaylistController {
                 return ResponseEntity.ok(body);
         }
 
-        @PostMapping("/{playlistId}")
+        @PostMapping()
         @PreAuthorize("isAuthenticated() && #userDetails != null")
         public ResponseEntity<ApiResponse> likePlaylist(
                         @Valid @RequestBody LikeResquest dto,

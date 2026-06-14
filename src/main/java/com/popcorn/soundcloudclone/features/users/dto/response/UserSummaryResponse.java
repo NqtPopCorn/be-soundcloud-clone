@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class UserSummaryResponse {
@@ -20,3 +21,4 @@ public class UserSummaryResponse {
     int followersCount;
     int followingCount;
 }
+

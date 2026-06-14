@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDate;
 import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -26,3 +27,4 @@ public class AlbumResponse {
     int likeCount;
     boolean liked;
 }
+

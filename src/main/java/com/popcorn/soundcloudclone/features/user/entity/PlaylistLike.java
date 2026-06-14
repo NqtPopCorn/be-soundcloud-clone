@@ -1,4 +1,9 @@
-package com.popcorn.soundcloudclone.features.track.entity;
+package com.popcorn.soundcloudclone.features.user.entity;
+
+import java.time.LocalDateTime;
+
+import com.popcorn.soundcloudclone.features.playlist.entity.Playlist;
+import com.popcorn.soundcloudclone.features.users.entity.User;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,33 +11,25 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-
-import com.popcorn.soundcloudclone.features.users.entity.User;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "track_like_log", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "track_id", "user_id" }, name = "unique_track_user")
+@Table(name = "playlist_like_log", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "playlist_id", "user_id" }, name = "unique_playlist_user")
 })
-public class TrackLike {
+public class PlaylistLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "track_id")
-    private Track track;
+    @JoinColumn(name = "playlist_id")
+    private Playlist playlist;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @CreatedBy
     private User user;
 
     @Column(updatable = false, nullable = false)
