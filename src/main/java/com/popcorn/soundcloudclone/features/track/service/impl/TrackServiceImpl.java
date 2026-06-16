@@ -1,5 +1,7 @@
 package com.popcorn.soundcloudclone.features.track.service.impl;
 
+import com.popcorn.soundcloudclone.common.exception.ApplicationException;
+import com.popcorn.soundcloudclone.common.exception.ErrorCode;
 import com.popcorn.soundcloudclone.features.genre.repository.GenreRepository;
 import com.popcorn.soundcloudclone.features.media.service.UploadService;
 import com.popcorn.soundcloudclone.features.track.dto.request.TrackCreationRequest;
@@ -56,7 +58,9 @@ public class TrackServiceImpl implements TrackService {
     public TrackResponse createTrack(int userId, TrackCreationRequest request) {
         Track track = trackMapper.toTrack(request);
 
-        track.setArtist(findUserOrThrow(userId));
+        User artist = findUserOrThrow(userId);
+        ensureCanUploadTrack(artist);
+        track.setArtist(artist);
         track.setGenres(genreRepository.findByIdIn(request.getGenreIds()));
         trackRepository.save(track);
 
@@ -111,6 +115,12 @@ public class TrackServiceImpl implements TrackService {
 
     private User findUserOrThrow(int userId) {
         return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void ensureCanUploadTrack(User user) {
+        if (!user.isActive() || (user.getRole() != User.Role.ARTIST && user.getRole() != User.Role.ADMIN)) {
+            throw new ApplicationException("Only active artists can upload tracks", ErrorCode.FORBIDDEN);
+        }
     }
 
     @Override
