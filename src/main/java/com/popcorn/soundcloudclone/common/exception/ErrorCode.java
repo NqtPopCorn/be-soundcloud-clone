@@ -22,6 +22,10 @@ public enum ErrorCode {
     INVALID_FIRSTNAME(106, 400, "First name is invalid"),
     INVALID_LASTNAME(107, 400, "Last name is invalid"),
     INVALID_ROLE(108, 400, "Role must be ADMIN, USER, ARTIST"),
+    ARTIST_UPGRADE_REQUEST_NOT_FOUND(109, 404, "Artist upgrade request not found"),
+    ARTIST_UPGRADE_REQUEST_ALREADY_PENDING(110, 409, "Artist upgrade request is already pending"),
+    ARTIST_UPGRADE_REQUEST_ALREADY_PROCESSED(111, 409, "Artist upgrade request is already processed"),
+    ARTIST_UPGRADE_NOT_ALLOWED(112, 403, "Artist upgrade request is not allowed"),
 
     // Các lỗi Validation dữ liệu bài hát/upload -> 400 Bad Request
     INVALID_STATUS(200, 400, "Status is invalid"),
