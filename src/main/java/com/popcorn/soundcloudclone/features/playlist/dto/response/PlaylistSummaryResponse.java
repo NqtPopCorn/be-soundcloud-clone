@@ -19,7 +19,7 @@ public class PlaylistSummaryResponse {
     private int likeCount;
     private String imageUrl;
     private boolean isPublic;
-    private boolean isLiked;
+    private boolean liked;
     private UserSummaryResponse user;
 }
 

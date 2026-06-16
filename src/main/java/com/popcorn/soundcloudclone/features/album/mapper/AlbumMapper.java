@@ -18,26 +18,24 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = { UserMapper.class, TrackMapper.class, SharedQualifier.class })
 public abstract class AlbumMapper {
 
-    @Autowired
-    protected CurrentUserContext ctx;
+    // Removed CurrentUserContext for stateless mapping
+
 
     @Mapping(target = "user", source = "artist")
     @Mapping(target = "tags", source = "tags", qualifiedByName = "splitTags")
-    @Mapping(target = "liked", expression = "java(ctx != null && ctx.isAlbumLiked(album.getId()))")
     @Mapping(target = "tracks", source = "joinTracks")
-    public abstract AlbumResponse toAlbumResponse(Album album, @Context CurrentUserContext ctx);
+    public abstract AlbumResponse toAlbumResponseBase(Album album);
 
     public AlbumResponse toAlbumResponse(Album album) {
-        return toAlbumResponse(album, ctx);
+        return toAlbumResponseBase(album);
     }
 
     @Mapping(target = "user", source = "artist")
     @Mapping(target = "tags", source = "tags", qualifiedByName = "splitTags")
-    @Mapping(target = "liked", expression = "java(ctx != null && ctx.isAlbumLiked(album.getId()))")
-    public abstract AlbumSummaryResponse toAlbumSummaryResponse(Album album, @Context CurrentUserContext ctx);
+    public abstract AlbumSummaryResponse toAlbumSummaryResponseBase(Album album);
 
     public AlbumSummaryResponse toAlbumSummaryResponse(Album album) {
-        return toAlbumSummaryResponse(album, ctx);
+        return toAlbumSummaryResponseBase(album);
     }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

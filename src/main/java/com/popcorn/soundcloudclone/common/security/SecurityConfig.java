@@ -1,5 +1,6 @@
 package com.popcorn.soundcloudclone.common.security;
 
+import com.popcorn.soundcloudclone.common.security.throttle.SpamThrottleFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,8 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SpamThrottleFilter spamThrottleFilter,
+            JwtAuthenticationFilter jwtFilter)
             throws Exception { // ,
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -40,6 +42,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .anyRequest().permitAll())
+                .addFilterBefore(spamThrottleFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint())

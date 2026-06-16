@@ -22,6 +22,6 @@ public class AlbumSummaryResponse {
     List<String> tags;
     LocalDate releaseDate;
     int likeCount;
-    boolean isLiked;
+    boolean liked;
 }
 

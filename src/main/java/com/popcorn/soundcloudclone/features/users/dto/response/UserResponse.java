@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Getter
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class UserResponse {
-    String id;
+    int id;
 
     String username;
 

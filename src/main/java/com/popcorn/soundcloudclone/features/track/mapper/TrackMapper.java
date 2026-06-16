@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Mapper(componentModel = "spring", uses = { UserMapper.class, SharedQualifier.class })
+@Mapper(componentModel = "spring", uses = { UserMapper.class, SharedQualifier.class }, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class TrackMapper {
 
-    @Autowired
-    protected CurrentUserContext ctx;
+    // Removed CurrentUserContext for stateless mapping
+
 
     // ========================================================================
     // 1. BASE MAPPING (Common logic)
@@ -31,32 +31,27 @@ public abstract class TrackMapper {
     @Mapping(target = "tags", source = ".", qualifiedByName = "splitTags")
     @Mapping(target = "audioUrl", source = "audioUrl")
     @Mapping(target = "imageUrl", source = "imageUrl")
-    @Mapping(target = "isLiked", expression = "java(ctx != null && ctx.isTrackLiked(track.getId()))")
-    protected abstract TrackResponse toTrackResponseBase(Track track, @Context CurrentUserContext ctx);
+    protected abstract TrackResponse toTrackResponseBase(Track track);
 
     public TrackResponse toTrackResponse(Track track) {
-        return toTrackResponse(track, ctx);
+        return toTrackResponseBase(track);
     }
 
-    @InheritConfiguration(name = "toTrackResponseBase")
-    public abstract TrackResponse toTrackResponse(Track track, @Context CurrentUserContext ctx);
+    // Removed inherited method with context
 
     @Mapping(target = ".", source = "track")
     @Mapping(target = "genres", source = "track", qualifiedByName = "getGenres")
     @Mapping(target = "tags", source = "track", qualifiedByName = "splitTags")
     @Mapping(target = "audioUrl", source = "track.audioUrl")
     @Mapping(target = "imageUrl", source = "track.imageUrl")
-    @Mapping(target = "isLiked", expression = "java(ctx != null && ctx.isTrackLiked(albumTrack.getTrack().getId()))")
-    public abstract TrackItemResponse toAlbumTrackResponse(AlbumTrack albumTrack, @Context CurrentUserContext ctx);
+    public abstract TrackItemResponse toAlbumTrackResponse(AlbumTrack albumTrack);
 
     @Mapping(target = ".", source = "track")
     @Mapping(target = "genres", source = "track", qualifiedByName = "getGenres")
     @Mapping(target = "tags", source = "track", qualifiedByName = "splitTags")
     @Mapping(target = "audioUrl", source = "track.audioUrl")
     @Mapping(target = "imageUrl", source = "track.imageUrl")
-    @Mapping(target = "isLiked", expression = "java(ctx != null && ctx.isTrackLiked(playlistTrack.getTrack().getId()))")
-    public abstract TrackItemResponse toPlaylistTrackResponse(PlaylistTrack playlistTrack,
-            @Context CurrentUserContext ctx);
+    public abstract TrackItemResponse toPlaylistTrackResponse(PlaylistTrack playlistTrack);
 
     // ========================================================================
     // 3. ENTITY UPDATE / CREATE

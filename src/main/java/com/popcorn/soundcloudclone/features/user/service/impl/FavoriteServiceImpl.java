@@ -58,7 +58,7 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
     private final CurrentUserContext currentUserContext;
 
     @Override
-    @Cacheable(value = "likedTrackIds", key = "#userId", unless = "#result == null || #result.isEmpty()")
+    // @Cacheable(value = "likedTrackIds", key = "#userId", unless = "#result == null || #result.isEmpty()")
     public Set<Integer> getLikedTrackIds(Integer userId) {
         if (userId == null)
             return new HashSet<>();
@@ -198,19 +198,18 @@ public class FavoriteServiceImpl implements FavoritePlaylistService, FavoriteTra
         Specification<TrackLike> spec = (root, query, criteriaBuilder) -> criteriaBuilder
                 .equal(root.get("user").get("id"), userId);
         return PageResponse.from(trackLikeRepository.findAll(spec, pageable)
-                .map(trackLike -> trackMapper.toTrackResponse(trackLike.getTrack(), currentUserContext)));
+                .map(trackLike -> trackMapper.toTrackResponse(trackLike.getTrack())));
     }
 
     @Override
     public PageResponse<AlbumSummaryResponse> getLikedAlbums(Integer userId, Pageable pageable) {
         return PageResponse.from(albumLikeRepo.findByUserId(userId, pageable).map(
-                albumLike -> albumMapper.toAlbumSummaryResponse(albumLike.getAlbum(), currentUserContext)));
+                albumLike -> albumMapper.toAlbumSummaryResponse(albumLike.getAlbum())));
     }
 
     @Override
     public PageResponse<PlaylistSummaryResponse> getLikedPlaylists(Integer userId, Pageable pageable) {
         return PageResponse.from(playlistLikeRepo.findByUserId(userId, pageable).map(
-                playlistLike -> playlistMapper.toPlaylistSummaryResponse(playlistLike.getPlaylist(),
-                        currentUserContext)));
+                playlistLike -> playlistMapper.toPlaylistSummaryResponse(playlistLike.getPlaylist())));
     }
 }

@@ -35,7 +35,7 @@ public class TrackResponse {
 
     UserSummaryResponse artist;
 
-    boolean isLiked;
+    boolean liked;
 
     String description;
 

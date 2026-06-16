@@ -17,28 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring", uses = { UserMapper.class, TrackMapper.class })
 public abstract class PlaylistMapper {
 
-    @Autowired
-    protected CurrentUserContext ctx;
+    // Removed CurrentUserContext for stateless mapping
+
 
     @Mapping(target = "user", source = "creator")
     @Mapping(target = "tracks", source = "joinTracks")
-    @Mapping(target = "isLiked", expression = "java(ctx != null && ctx.isPlaylistLiked(playlist.getId()))")
-    public abstract PlaylistResponse toPlaylistResponse(Playlist playlist, @Context CurrentUserContext ctx);
+    public abstract PlaylistResponse toPlaylistResponseBase(Playlist playlist);
 
     public PlaylistResponse toPlaylistResponse(Playlist playlist) {
-        return toPlaylistResponse(playlist, ctx);
+        return toPlaylistResponseBase(playlist);
     }
 
     // Method này không cần check like track nên không cần Context
     @Mapping(target = "name", source = "name")
     @Mapping(target = "user", source = "creator")
     @Mapping(target = "trackCount", expression = "java(playlist.getJoinTracks() != null ? playlist.getJoinTracks().size() : 0)")
-    @Mapping(target = "isLiked", expression = "java(ctx != null && ctx.isPlaylistLiked(playlist.getId()))")
-    public abstract PlaylistSummaryResponse toPlaylistSummaryResponse(Playlist playlist,
-            @Context CurrentUserContext ctx);
+    public abstract PlaylistSummaryResponse toPlaylistSummaryResponseBase(Playlist playlist);
 
     public PlaylistSummaryResponse toPlaylistSummaryResponse(Playlist playlist) {
-        return toPlaylistSummaryResponse(playlist, ctx);
+        return toPlaylistSummaryResponseBase(playlist);
     }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
