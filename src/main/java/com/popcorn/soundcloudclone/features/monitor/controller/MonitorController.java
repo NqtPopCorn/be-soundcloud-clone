@@ -1,14 +1,11 @@
 package com.popcorn.soundcloudclone.features.monitor.controller;
 
 import com.popcorn.soundcloudclone.common.response.ApiResponse;
-import com.popcorn.soundcloudclone.features.monitor.entity.SystemLog;
-import com.popcorn.soundcloudclone.features.monitor.repository.SystemLogRepository;
+
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Measurement;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MonitorController {
 
-    private final SystemLogRepository systemLogRepository;
+
     private final MeterRegistry meterRegistry;
 
     @GetMapping("/metrics")
@@ -65,26 +62,5 @@ public class MonitorController {
                 .build();
     }
 
-    @GetMapping("/logs")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<SystemLog>> getLogs(
-            @RequestParam(required = false) String level,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size
-    ) {
-        if ("ALL".equalsIgnoreCase(level) || level != null && level.trim().isEmpty()) {
-            level = null;
-        }
-        
-        Page<SystemLog> logs = systemLogRepository.findByFilter(
-                level, keyword, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"))
-        );
-        
-        return ApiResponse.<Page<SystemLog>>builder()
-                .statusCode(200)
-                .message("Success")
-                .result(logs)
-                .build();
-    }
+
 }

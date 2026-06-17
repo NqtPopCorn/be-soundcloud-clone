@@ -1,9 +1,13 @@
 .planning
 .agent
 .roo
+
+.env
+.env.*
+
 uploads/
 
-src/main/resources/application-dev.properties
+src/main/resources/application-*.properties
 
 target/
 .mvn/wrapper/maven-wrapper.jar
