@@ -68,15 +68,6 @@ services:
       - "8080:8080"
     restart: unless-stopped
 
-  dozzle:
-    image: amir20/dozzle:latest
-    container_name: soundcloud_dozzle
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "9999:8080"
-    restart: unless-stopped
-
   frontend:
     build:
       context: H:\Code\Vite Project\soundcloudclone

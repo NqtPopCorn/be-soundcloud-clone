@@ -1,0 +1,28 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  ci:
+    name: Test and Build Spring Boot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
+      - name: Build application
+        run: ./mvnw clean package -DskipTests
