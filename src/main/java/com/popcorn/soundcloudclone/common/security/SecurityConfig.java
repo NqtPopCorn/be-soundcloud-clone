@@ -2,6 +2,8 @@ package com.popcorn.soundcloudclone.common.security;
 
 import com.popcorn.soundcloudclone.common.security.throttle.SpamThrottleFilter;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +28,9 @@ import java.util.List;
 @Configuration
 @EnableMethodSecurity // để dùng @PreAuthorize
 public class SecurityConfig {
+
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, SpamThrottleFilter spamThrottleFilter,
@@ -53,7 +58,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // hoặc "*", nếu cần mở rộng hơn
+        config.setAllowedOrigins(allowedOrigins); // hoặc "*", nếu cần mở rộng hơn
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("*")); // Cho phép mọi header
         config.setAllowCredentials(true); // Nếu bạn dùng cookie hoặc Authorization header

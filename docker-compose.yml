@@ -38,9 +38,7 @@ services:
       retries: 10
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/nqtpopcorn/be-soundcloud-clone:latest
     container_name: soundcloud_backend
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -56,6 +54,13 @@ services:
       APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME}
       APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL}
       APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
+
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      
     depends_on:
       mysql:
         condition: service_healthy
@@ -69,11 +74,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: H:\Code\Vite Project\soundcloudclone
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: ghcr.io/nqtpopcorn/soundcloudclone-frontend:latest
     container_name: soundcloud_frontend
     depends_on:
       - backend
