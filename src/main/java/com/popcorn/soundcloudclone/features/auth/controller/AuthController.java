@@ -61,6 +61,31 @@ public class AuthController {
                                 .body(body);
         }
 
+        @PostMapping("/google")
+        public ResponseEntity<ApiResponse<AuthResponse>> authenticateWithGoogle(@RequestBody com.popcorn.soundcloudclone.features.auth.dto.request.GoogleLoginBody loginBody) {
+                var authResponse = authService.authenticateWithGoogle(loginBody.getCredential());
+                var body = ApiResponse.<AuthResponse>builder()
+                                .statusCode(200)
+                                .message("Success")
+                                .result(authResponse)
+                                .build();
+
+                String refreshToken = authResponse.getRefreshToken();
+                long refreshTokenExpiresIn = authResponse.getRefreshTokenExpiresIn();
+
+                ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", refreshToken)
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(refreshTokenExpiresIn)
+                                .sameSite("Lax")
+                                .build();
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                                .body(body);
+        }
+
         @PostMapping("/logout")
         public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal MyUserDetails userDetails,
                         HttpServletRequest request) {

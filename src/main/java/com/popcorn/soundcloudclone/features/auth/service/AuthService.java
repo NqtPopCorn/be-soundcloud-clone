@@ -13,4 +13,5 @@ public interface AuthService {
 
     String refreshToken(String token);
 
+    AuthResponse authenticateWithGoogle(String credential);
 }

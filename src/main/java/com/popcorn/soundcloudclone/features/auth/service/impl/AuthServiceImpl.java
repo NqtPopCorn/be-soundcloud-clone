@@ -1,5 +1,10 @@
 package com.popcorn.soundcloudclone.features.auth.service.impl;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -48,6 +53,53 @@ public class AuthServiceImpl implements AuthService {
     static int REFRESH_TOKEN_EXPIRATION_DAYS = 30;
     static int ACCESS_TOKEN_EXPIRATION_MINUTES = 30;
 
+    @Value("${google.client-id:YOUR_GOOGLE_CLIENT_ID}")
+    @NonFinal
+    private String googleClientId;
+
+    @Override
+    public AuthResponse authenticateWithGoogle(String credential) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(java.util.Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(credential);
+            if (idToken == null) {
+                throw new ApplicationException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+
+            User user = userRepository.findByEmail(email).orElseGet(() -> {
+                User newUser = User.builder()
+                        .username(email.split("@")[0] + "_" + UUID.randomUUID().toString().substring(0, 4))
+                        .email(email)
+                        .firstName(name)
+                        .lastName("")
+                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .role(User.Role.USER)
+                        .avatarUrl(pictureUrl)
+                        .active(true)
+                        .build();
+                return userRepository.save(newUser);
+            });
+
+            if (!user.isActive()) {
+                throw new ApplicationException(ErrorCode.FORBIDDEN);
+            }
+
+            return generateTokens(user);
+
+        } catch (Exception e) {
+            log.error("Google authentication failed", e);
+            throw new ApplicationException(ErrorCode.UNAUTHENTICATED);
+        }
+    }
+
     @Override
     public AuthResponse authenticate(String username, String password) {
         var user = userRepository.findByUsername(username)
@@ -61,6 +113,10 @@ public class AuthServiceImpl implements AuthService {
             throw new ApplicationException(ErrorCode.FORBIDDEN);
         }
 
+        return generateTokens(user);
+    }
+
+    private AuthResponse generateTokens(User user) {
         Instant accessTokenExpires = Instant.now().plus(ACCESS_TOKEN_EXPIRATION_MINUTES, ChronoUnit.MINUTES);
         JwtPayload payload = JwtPayload.builder()
                 .userId(user.getId())
