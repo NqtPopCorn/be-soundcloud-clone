@@ -11,5 +11,7 @@ public interface GenreService {
 
     int delete(int genreId);
 
+    GenreResponse update(int id, String newName);
+
     List<GenreResponse> findAll();
 }

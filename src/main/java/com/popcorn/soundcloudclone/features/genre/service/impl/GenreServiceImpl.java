@@ -45,6 +45,14 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
+    public GenreResponse update(int id, String newName) {
+        Genre found = genreRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.TAG_NOT_FOUND));
+        found.setName(newName);
+        return genreMapper.toResponse(genreRepository.save(found));
+    }
+
+    @Override
     public List<GenreResponse> findAll() {
         return genreMapper.toListResponse(genreRepository.findAll());
     }
